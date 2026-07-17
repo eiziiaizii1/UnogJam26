@@ -202,3 +202,22 @@ Plus: Git LFS wired for binary asset types in `.gitattributes` (§11.12).
 5. `Tools ▸ IloveNature ▸ Validate Data` → logs `OK — 0 validatable asset(s) passed`.
 
 **Next:** on green, proceed to **M1 Vertical Slice** (§8) — Input System + PlayerMotor, pooled shooting, one data-driven enemy, one destructible, camera follow, one collectible, level-end trigger; prove feel.
+
+### M1 — Vertical Slice · *in progress: walk + jump slice done*
+
+**Delivered (input + movement)**
+- `Settings/Input/GameControls.inputactions` — Player map: `Move` (Vector2; WASD/arrows/left-stick), `Jump` (Button; Space/gamepad south). **C# wrapper generation enabled** → Unity generates `Code/Runtime/Input/GameControls.cs` on import.
+- `Runtime/Input/InputReader` — the single edge translating the generated actions into intents (`Move`, `JumpPressed`, `JumpReleased`). Gameplay never touches Keyboard/Gamepad (§5.8, §11.9).
+- `Runtime/Player/PlayerMotor` — walk (accel toward target speed) + jump on `Rigidbody2D`, with coyote time, jump buffering, and variable jump height. Collision-normal grounding (no LayerMask setup). All values inspector-tunable (§6.3).
+- `Editor/Sandbox/PlayerSandboxBuilder` — `Tools ▸ Build Player Sandbox`: generates a placeholder sprite + ground + wired player for immediate feel testing.
+- `Game.Runtime.asmdef` now references `Unity.InputSystem`.
+
+**Scope note:** per your direction this is **walk only** (no sprint/run action). Sprint stays out until asked.
+
+**How to test**
+1. Focus Unity → it imports the `.inputactions` (generating `GameControls.cs`) and recompiles. Console = zero errors.
+2. `Tools ▸ IloveNature ▸ Build Player Sandbox` (in any open scene).
+3. **Play** → `A`/`D` or arrows walk; `Space`/gamepad-south jumps. Check: responsive jump (buffer + coyote), short tap = short hop (variable height), lands cleanly on the ground.
+4. Tune feel live in the `PlayerMotor` inspector (walk speed, jump speed, coyote/buffer, jump cut).
+
+**Remaining M1:** pooled shooting, one data-driven enemy, one destructible, camera follow, one collectible, level-end trigger.
