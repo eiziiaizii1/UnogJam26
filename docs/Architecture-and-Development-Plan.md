@@ -203,21 +203,21 @@ Plus: Git LFS wired for binary asset types in `.gitattributes` (§11.12).
 
 **Next:** on green, proceed to **M1 Vertical Slice** (§8) — Input System + PlayerMotor, pooled shooting, one data-driven enemy, one destructible, camera follow, one collectible, level-end trigger; prove feel.
 
-### M1 — Vertical Slice · *in progress: walk + jump slice done*
+### M1 — Vertical Slice · *in progress: walk + jump + shoot done*
 
-**Delivered (input + movement)**
-- `Settings/Input/GameControls.inputactions` — Player map: `Move` (Vector2; WASD/arrows/left-stick), `Jump` (Button; Space/gamepad south). **C# wrapper generation enabled** → Unity generates `Code/Runtime/Input/GameControls.cs` on import.
-- `Runtime/Input/InputReader` — the single edge translating the generated actions into intents (`Move`, `JumpPressed`, `JumpReleased`). Gameplay never touches Keyboard/Gamepad (§5.8, §11.9).
-- `Runtime/Player/PlayerMotor` — walk (accel toward target speed) + jump on `Rigidbody2D`, with coyote time, jump buffering, and variable jump height. Collision-normal grounding (no LayerMask setup). All values inspector-tunable (§6.3).
-- `Editor/Sandbox/PlayerSandboxBuilder` — `Tools ▸ Build Player Sandbox`: generates a placeholder sprite + ground + wired player for immediate feel testing.
-- `Game.Runtime.asmdef` now references `Unity.InputSystem`.
+**Delivered (input + movement + shooting)**
+- `Settings/Input/GameControls.inputactions` — Player map: `Move` (Vector2; WASD/arrows/left-stick), `Jump` (Button; Space/gamepad south), `Fire` (Button; left-mouse/J/gamepad RT). **C# wrapper generation enabled** → Unity generates `Code/Runtime/Input/GameControls.cs` on import.
+- `Runtime/Input/InputReader` — the single edge translating actions into intents (`Move`, `JumpPressed`, `JumpReleased`, `FireHeld`). Gameplay never touches Keyboard/Gamepad (§5.8, §11.9).
+- `Runtime/Player/PlayerMotor` — walk + jump on `Rigidbody2D`, with coyote time, jump buffering, variable jump height. Collision-normal grounding. Inspector-tunable (§6.3).
+- `Runtime/Combat/{Bullet, BulletPool, Shooter}` — **composition, not a god object**: `Shooter` sits beside `PlayerMotor`, both fed by the one `InputReader`. Bullets are pooled via `UnityEngine.Pool` behind a factory `Spawn` (Pillar 3 / §4.2); auto-fire at a tunable rate in the last-faced direction.
+- `Editor/Sandbox/PlayerSandboxBuilder` — `Tools ▸ Build Player Sandbox` (idempotent): sprite + ground + bullet prefab + pool + wired player. Re-running refreshes the sandbox.
+- `Game.Runtime.asmdef` references `Unity.InputSystem`.
 
-**Scope note:** per your direction this is **walk only** (no sprint/run action). Sprint stays out until asked.
+**Scope notes:** **walk only** (no sprint) per your direction. Shooting kept as its own component (declined to weld into one script — that is the §10.1 god-object smell); say the word to merge if you disagree.
 
 **How to test**
-1. Focus Unity → it imports the `.inputactions` (generating `GameControls.cs`) and recompiles. Console = zero errors.
-2. `Tools ▸ IloveNature ▸ Build Player Sandbox` (in any open scene).
-3. **Play** → `A`/`D` or arrows walk; `Space`/gamepad-south jumps. Check: responsive jump (buffer + coyote), short tap = short hop (variable height), lands cleanly on the ground.
-4. Tune feel live in the `PlayerMotor` inspector (walk speed, jump speed, coyote/buffer, jump cut).
+1. Focus Unity → it imports the `.inputactions` (regenerating `GameControls.cs` with the new `Fire`) and recompiles. Console = zero errors.
+2. `Tools ▸ IloveNature ▸ Build Player Sandbox`.
+3. **Play** → `A`/`D` walk, `Space` jump, **`J` or left-mouse shoot** (bullets fly the way you last moved). Tune `PlayerMotor` and `Shooter` inspectors live.
 
-**Remaining M1:** pooled shooting, one data-driven enemy, one destructible, camera follow, one collectible, level-end trigger.
+**Remaining M1:** one data-driven enemy, one destructible, camera follow, one collectible, level-end trigger.

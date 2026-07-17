@@ -24,6 +24,9 @@ namespace Game.Runtime.Input
         /// <summary>Raised when the jump button is released (drives variable jump height).</summary>
         public event Action JumpReleased;
 
+        /// <summary>True while the fire button is held (the shooter auto-fires at its own rate).</summary>
+        public bool FireHeld { get; private set; }
+
         private void Awake()
         {
             _controls = new GameControls();
@@ -46,6 +49,7 @@ namespace Game.Runtime.Input
         private void Update()
         {
             Move = _controls.Player.Move.ReadValue<Vector2>();
+            FireHeld = _controls.Player.Fire.IsPressed();
         }
 
         private void OnJumpPerformed(InputAction.CallbackContext context) => JumpPressed?.Invoke();
