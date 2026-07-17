@@ -203,7 +203,7 @@ Plus: Git LFS wired for binary asset types in `.gitattributes` (§11.12).
 
 **Next:** on green, proceed to **M1 Vertical Slice** (§8) — Input System + PlayerMotor, pooled shooting, one data-driven enemy, one destructible, camera follow, one collectible, level-end trigger; prove feel.
 
-### M1 — Vertical Slice · *in progress: walk + jump + shoot + camera done*
+### M1 — Vertical Slice · *in progress: walk + jump + shoot + camera + damage/destructibles done*
 
 **Delivered (input + movement + shooting)**
 - `Settings/Input/GameControls.inputactions` — Player map: `Move` (Vector2; WASD/arrows/left-stick), `Jump` (Button; Space/gamepad south), `Fire` (Button; left-mouse/J/gamepad RT). **C# wrapper generation enabled** → Unity generates `Code/Runtime/Input/GameControls.cs` on import.
@@ -211,6 +211,7 @@ Plus: Git LFS wired for binary asset types in `.gitattributes` (§11.12).
 - `Runtime/Player/PlayerMotor` — walk + jump on `Rigidbody2D`, with coyote time, jump buffering, variable jump height. Collision-normal grounding. Inspector-tunable (§6.3).
 - `Runtime/Combat/{Bullet, BulletPool, Shooter}` — **composition, not a god object**: `Shooter` sits beside `PlayerMotor`, both fed by the one `InputReader`. Bullets are pooled via `UnityEngine.Pool` behind a factory `Spawn` (Pillar 3 / §4.2); auto-fire at a tunable rate in the last-faced direction.
 - `Runtime/Presentation/CameraFollow` — LateUpdate smoothed follow with separate horizontal/vertical damping (§11.7).
+- `Core/Combat/{Health, IDamageable}` — pure damage model + narrow damage contract; 7 unit tests (`HealthTests`). `Runtime/Combat/HealthComponent` (adapter implementing `IDamageable`, re-broadcasts Died/Changed) + `Runtime/Combat/DestroyOnDeath` (reusable death reaction). `Bullet` now applies `_damage` to any `IDamageable` on hit. Sandbox spawns 3 solid crates (3 HP) that block and can be shot to clear.
 - `Editor/Sandbox/PlayerSandboxBuilder` — `Tools ▸ Build Player Sandbox` (idempotent): sprite + scenery (ground + background markers) + bullet prefab + pool + wired player + camera-follow wired to the player. Re-running refreshes the sandbox.
 - `Game.Runtime.asmdef` references `Unity.InputSystem`.
 
@@ -221,4 +222,4 @@ Plus: Git LFS wired for binary asset types in `.gitattributes` (§11.12).
 2. `Tools ▸ IloveNature ▸ Build Player Sandbox`.
 3. **Play** → `A`/`D` walk, `Space` jump, **`J` or left-mouse shoot** (bullets fly the way you last moved). Tune `PlayerMotor` and `Shooter` inspectors live.
 
-**Remaining M1:** `Health`/`IDamageable` + one destructible, one data-driven enemy, one collectible, level-end trigger.
+**Remaining M1:** one data-driven enemy (reuses `HealthComponent` + `DestroyOnDeath`; adds `EnemyDefinition` SO + contact damage → player `HealthComponent`), one collectible, level-end trigger.

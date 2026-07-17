@@ -165,6 +165,25 @@ namespace Game.Editor.Sandbox
                 postRenderer.color = new Color(0.30f, 0.45f, 0.28f);
                 postRenderer.sortingOrder = -1;
             }
+
+            // Destructible crates: solid obstacles at the player's shoot height. 3 hits to clear.
+            var crateColor = new Color(0.55f, 0.40f, 0.25f);
+            for (int i = 1; i <= 3; i++)
+            {
+                var crate = new GameObject($"Crate {i}");
+                crate.transform.SetParent(root.transform);
+                crate.transform.position = new Vector3(i * 3f, -1.75f, 0f);
+                crate.transform.localScale = new Vector3(1f, 1.5f, 1f);
+
+                var crateRenderer = crate.AddComponent<SpriteRenderer>();
+                crateRenderer.sprite = sprite;
+                crateRenderer.color = crateColor;
+                crateRenderer.sortingOrder = 1;
+
+                crate.AddComponent<BoxCollider2D>();
+                crate.AddComponent<HealthComponent>(); // default 3 HP
+                crate.AddComponent<DestroyOnDeath>();
+            }
         }
 
         private static GameObject EnsureCamera()

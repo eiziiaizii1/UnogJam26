@@ -1,3 +1,4 @@
+using Game.Core.Combat;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -12,6 +13,7 @@ namespace Game.Runtime.Combat
     public sealed class Bullet : MonoBehaviour
     {
         [SerializeField] private float _lifetimeSeconds = 2f;
+        [SerializeField] private int _damage = 1;
 
         private Rigidbody2D _body;
         private IObjectPool<Bullet> _pool;
@@ -52,6 +54,12 @@ namespace Game.Runtime.Combat
         private void OnTriggerEnter2D(Collider2D other)
         {
             if (other.gameObject == _owner) return;
+
+            if (other.TryGetComponent<IDamageable>(out var damageable) && damageable.IsAlive)
+            {
+                damageable.ApplyDamage(_damage);
+            }
+
             Despawn();
         }
 
