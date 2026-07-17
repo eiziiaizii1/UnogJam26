@@ -1,5 +1,6 @@
 using System.IO;
 using Game.Runtime.Combat;
+using Game.Runtime.Enemies;
 using Game.Runtime.Input;
 using Game.Runtime.Player;
 using Game.Runtime.Presentation;
@@ -17,6 +18,8 @@ namespace Game.Editor.Sandbox
     {
         private const string SquareSpritePath = "Assets/_Project/Content/Shared/Square.png";
         private const string BulletPrefabPath = "Assets/_Project/Content/Combat/Bullet.prefab";
+        private const string EnemyDefinitionPath = "Assets/_Project/Data/Enemies/Critter.asset";
+        private const string EnemyPrefabPath = "Assets/_Project/Content/Enemies/Enemy.prefab";
         private static readonly Color RobotColor = new(0.25f, 0.28f, 0.32f);
         private static readonly Color NatureColor = new(0.36f, 0.62f, 0.30f);
         private static readonly Color LaserColor = new(1f, 0.85f, 0.30f);
@@ -28,15 +31,19 @@ namespace Game.Editor.Sandbox
 
             var sprite = GetOrCreateSquareSprite();
             var cameraGo = EnsureCamera();
-            CreateScenery(sprite);
+            var sandboxRoot = CreateScenery(sprite);
 
-            var bulletPrefab = GetOrCreateBulletPrefab(sprite);
+            var enemyDefinition = GetOrCreateEnemyDefinition();
+            var enemyPrefab = BuildEnemyPrefab(sprite, enemyDefinition);
+            SpawnEnemy(enemyPrefab, sandboxRoot);
+
+            var bulletPrefab = BuildBulletPrefab(sprite);
             var pool = CreateBulletPool(bulletPrefab);
             var player = CreatePlayer(sprite, pool);
             WireCameraFollow(cameraGo, player);
 
             Selection.activeGameObject = player;
-            Debug.Log("[PlayerSandbox] Built scenery + player + bullet pool + camera follow. Play — A/D walk, Space jump, J / left-mouse shoot.");
+            Debug.Log("[PlayerSandbox] Built scenery + enemy + player + bullet pool + camera follow. Play — A/D walk, Space jump, J / left-mouse shoot. Face left to hit the enemy, right to break crates.");
         }
 
         private static void ClearPreviousSandbox()
@@ -89,6 +96,23 @@ namespace Game.Editor.Sandbox
             shooterSerialized.FindProperty("_bulletPool").objectReferenceValue = pool;
             shooterSerialized.ApplyModifiedProperties();
 
+            var health = Undo.AddComponent<HealthComponent>(go);
+            var healthSerialized = new SerializedObject(health);
+            healthSerialized.FindProperty("_maxHealth").intValue = 5;
+            healthSerialized.ApplyModifiedProperties();
+
+            Undo.AddComponent<DamageFlash>(go);
+
+            var death = Undo.AddComponent<PlayerDeath>(go);
+            var deathSerialized = new SerializedObject(death);
+            var disableList = deathSerialized.FindProperty("_disableOnDeath");
+            disableList.arraySize = 3;
+            disableList.GetArrayElementAtIndex(0).objectReferenceValue = motor;
+            disableList.GetArrayElementAtIndex(1).objectReferenceValue = shooter;
+            disableList.GetArrayElementAtIndex(2).objectReferenceValue = input;
+            deathSerialized.FindProperty("_renderer").objectReferenceValue = renderer;
+            deathSerialized.ApplyModifiedProperties();
+
             return go;
         }
 
@@ -105,11 +129,9 @@ namespace Game.Editor.Sandbox
             return pool;
         }
 
-        private static GameObject GetOrCreateBulletPrefab(Sprite sprite)
+        private static GameObject BuildBulletPrefab(Sprite sprite)
         {
-            var existing = AssetDatabase.LoadAssetAtPath<GameObject>(BulletPrefabPath);
-            if (existing != null) return existing;
-
+            // Always rebuilt so the sandbox reflects current component code, not a stale prefab.
             Directory.CreateDirectory(Path.GetDirectoryName(BulletPrefabPath));
 
             var temp = new GameObject("Bullet");
@@ -136,7 +158,7 @@ namespace Game.Editor.Sandbox
             return prefab;
         }
 
-        private static void CreateScenery(Sprite sprite)
+        private static GameObject CreateScenery(Sprite sprite)
         {
             var root = new GameObject("Sandbox");
             Undo.RegisterCreatedObjectUndo(root, "Create Sandbox");
@@ -184,6 +206,71 @@ namespace Game.Editor.Sandbox
                 crate.AddComponent<HealthComponent>(); // default 3 HP
                 crate.AddComponent<DestroyOnDeath>();
             }
+
+            return root;
+        }
+
+        private static void SpawnEnemy(GameObject enemyPrefab, GameObject sandboxRoot)
+        {
+            var enemy = (GameObject)PrefabUtility.InstantiatePrefab(enemyPrefab, sandboxRoot.transform);
+            enemy.transform.position = new Vector3(-8f, -1.75f, 0f);
+        }
+
+        private static EnemyDefinition GetOrCreateEnemyDefinition()
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<EnemyDefinition>(EnemyDefinitionPath);
+            if (existing != null) return existing;
+
+            Directory.CreateDirectory(Path.GetDirectoryName(EnemyDefinitionPath));
+
+            var definition = ScriptableObject.CreateInstance<EnemyDefinition>();
+            var serialized = new SerializedObject(definition);
+            serialized.FindProperty("_displayName").stringValue = "Critter";
+            serialized.FindProperty("_maxHealth").intValue = 3;
+            serialized.FindProperty("_moveSpeed").floatValue = 2f;
+            serialized.FindProperty("_contactDamage").intValue = 1;
+            serialized.FindProperty("_patrolHalfWidth").floatValue = 3f;
+            serialized.FindProperty("_tintColor").colorValue = new Color(0.80f, 0.30f, 0.25f);
+            serialized.FindProperty("_size").vector2Value = Vector2.one;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+
+            AssetDatabase.CreateAsset(definition, EnemyDefinitionPath);
+            AssetDatabase.SaveAssets();
+            return definition;
+        }
+
+        private static GameObject BuildEnemyPrefab(Sprite sprite, EnemyDefinition definition)
+        {
+            // Always rebuilt so the sandbox reflects current component code, not a stale prefab.
+            Directory.CreateDirectory(Path.GetDirectoryName(EnemyPrefabPath));
+
+            var temp = new GameObject("Enemy");
+            temp.transform.localScale = new Vector3(definition.Size.x, definition.Size.y, 1f);
+
+            var renderer = temp.AddComponent<SpriteRenderer>();
+            renderer.sprite = sprite;
+            renderer.color = definition.TintColor;
+            renderer.sortingOrder = 8;
+
+            var body = temp.AddComponent<Rigidbody2D>();
+            body.bodyType = RigidbodyType2D.Kinematic;
+            body.interpolation = RigidbodyInterpolation2D.Interpolate;
+            body.freezeRotation = true;
+
+            temp.AddComponent<BoxCollider2D>();
+            temp.AddComponent<HealthComponent>();
+            temp.AddComponent<DestroyOnDeath>();
+            temp.AddComponent<DamageFlash>();
+            temp.AddComponent<ContactDamage>();
+
+            var controller = temp.AddComponent<EnemyController>();
+            var serialized = new SerializedObject(controller);
+            serialized.FindProperty("_definition").objectReferenceValue = definition;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+
+            var prefab = PrefabUtility.SaveAsPrefabAsset(temp, EnemyPrefabPath);
+            Object.DestroyImmediate(temp);
+            return prefab;
         }
 
         private static GameObject EnsureCamera()

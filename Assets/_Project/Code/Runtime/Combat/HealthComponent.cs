@@ -25,14 +25,34 @@ namespace Game.Runtime.Combat
 
         private void Awake()
         {
-            _health = new Health(_maxHealth);
-            _health.Changed += (current, max) => Changed?.Invoke(current, max);
-            _health.Died += () => Died?.Invoke();
+            // Skip if a spawner already configured us via SetMaxHealth (data-driven enemies).
+            if (_health == null)
+            {
+                Build(_maxHealth);
+            }
+        }
+
+        /// <summary>Overrides max HP from data (e.g. an EnemyDefinition) and resets to full.</summary>
+        public void SetMaxHealth(int maxHealth)
+        {
+            Build(maxHealth);
         }
 
         public void ApplyDamage(int amount)
         {
             _health.TakeDamage(amount);
         }
+
+        private void Build(int maxHealth)
+        {
+            _maxHealth = maxHealth;
+            _health = new Health(maxHealth);
+            _health.Changed += OnHealthChanged;
+            _health.Died += OnHealthDied;
+        }
+
+        private void OnHealthChanged(int current, int max) => Changed?.Invoke(current, max);
+
+        private void OnHealthDied() => Died?.Invoke();
     }
 }
