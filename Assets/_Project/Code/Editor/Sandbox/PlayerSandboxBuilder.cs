@@ -2,6 +2,7 @@ using System.IO;
 using Game.Runtime.Combat;
 using Game.Runtime.Input;
 using Game.Runtime.Player;
+using Game.Runtime.Presentation;
 using UnityEditor;
 using UnityEngine;
 
@@ -26,15 +27,16 @@ namespace Game.Editor.Sandbox
             ClearPreviousSandbox();
 
             var sprite = GetOrCreateSquareSprite();
-            EnsureCamera();
-            CreateGround(sprite);
+            var cameraGo = EnsureCamera();
+            CreateScenery(sprite);
 
             var bulletPrefab = GetOrCreateBulletPrefab(sprite);
             var pool = CreateBulletPool(bulletPrefab);
             var player = CreatePlayer(sprite, pool);
+            WireCameraFollow(cameraGo, player);
 
             Selection.activeGameObject = player;
-            Debug.Log("[PlayerSandbox] Built ground + player + bullet pool. Play — A/D walk, Space jump, J / left-mouse shoot.");
+            Debug.Log("[PlayerSandbox] Built scenery + player + bullet pool + camera follow. Play — A/D walk, Space jump, J / left-mouse shoot.");
         }
 
         private static void ClearPreviousSandbox()
@@ -47,10 +49,10 @@ namespace Game.Editor.Sandbox
             {
                 Undo.DestroyObjectImmediate(pool.gameObject);
             }
-            var ground = GameObject.Find("Ground");
-            if (ground != null)
+            var scenery = GameObject.Find("Sandbox");
+            if (scenery != null)
             {
-                Undo.DestroyObjectImmediate(ground);
+                Undo.DestroyObjectImmediate(scenery);
             }
         }
 
@@ -134,25 +136,43 @@ namespace Game.Editor.Sandbox
             return prefab;
         }
 
-        private static void CreateGround(Sprite sprite)
+        private static void CreateScenery(Sprite sprite)
         {
-            var go = new GameObject("Ground");
-            Undo.RegisterCreatedObjectUndo(go, "Create Ground");
-            go.transform.position = new Vector3(0f, -3f, 0f);
-            go.transform.localScale = new Vector3(30f, 1f, 1f);
+            var root = new GameObject("Sandbox");
+            Undo.RegisterCreatedObjectUndo(root, "Create Sandbox");
 
-            var renderer = Undo.AddComponent<SpriteRenderer>(go);
-            renderer.sprite = sprite;
-            renderer.color = NatureColor;
-            renderer.sortingOrder = 0;
+            var ground = new GameObject("Ground");
+            ground.transform.SetParent(root.transform);
+            ground.transform.position = new Vector3(0f, -3f, 0f);
+            ground.transform.localScale = new Vector3(30f, 1f, 1f);
+            var groundRenderer = ground.AddComponent<SpriteRenderer>();
+            groundRenderer.sprite = sprite;
+            groundRenderer.color = NatureColor;
+            groundRenderer.sortingOrder = 0;
+            ground.AddComponent<BoxCollider2D>();
 
-            Undo.AddComponent<BoxCollider2D>(go);
+            // Background posts so camera-follow motion is visible against the flat ground.
+            for (int i = -3; i <= 3; i++)
+            {
+                if (i == 0) continue;
+
+                var post = new GameObject($"Marker {i}");
+                post.transform.SetParent(root.transform);
+                post.transform.position = new Vector3(i * 4f, -1.5f, 1f);
+                post.transform.localScale = new Vector3(0.4f, 3f, 1f);
+                var postRenderer = post.AddComponent<SpriteRenderer>();
+                postRenderer.sprite = sprite;
+                postRenderer.color = new Color(0.30f, 0.45f, 0.28f);
+                postRenderer.sortingOrder = -1;
+            }
         }
 
-        private static void EnsureCamera()
+        private static GameObject EnsureCamera()
         {
-            if (Camera.main != null) return;
-            if (Object.FindFirstObjectByType<Camera>() != null) return;
+            if (Camera.main != null) return Camera.main.gameObject;
+
+            var any = Object.FindFirstObjectByType<Camera>();
+            if (any != null) return any.gameObject;
 
             var go = new GameObject("Main Camera");
             Undo.RegisterCreatedObjectUndo(go, "Create Camera");
@@ -163,6 +183,20 @@ namespace Game.Editor.Sandbox
             cam.orthographic = true;
             cam.orthographicSize = 5f;
             cam.backgroundColor = new Color(0.15f, 0.18f, 0.22f);
+            return go;
+        }
+
+        private static void WireCameraFollow(GameObject cameraGo, GameObject player)
+        {
+            var follow = cameraGo.GetComponent<CameraFollow>();
+            if (follow == null)
+            {
+                follow = Undo.AddComponent<CameraFollow>(cameraGo);
+            }
+
+            var serialized = new SerializedObject(follow);
+            serialized.FindProperty("_target").objectReferenceValue = player.transform;
+            serialized.ApplyModifiedProperties();
         }
 
         private static Sprite GetOrCreateSquareSprite()
