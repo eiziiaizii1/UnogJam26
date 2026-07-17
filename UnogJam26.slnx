@@ -1,0 +1,10 @@
+﻿<Solution>
+  <Project Path="PrimeTween.Demo.csproj" />
+  <Project Path="Game.Tests.EditMode.csproj" />
+  <Project Path="Game.Core.csproj" />
+  <Project Path="Game.Editor.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="PrimeTween.Debug.csproj" />
+  <Project Path="Game.Runtime.csproj" />
+  <Project Path="PrimeTween.Installer.csproj" />
+</Solution>
