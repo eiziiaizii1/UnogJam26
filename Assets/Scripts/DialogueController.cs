@@ -28,23 +28,7 @@ public class DialogueController : MonoBehaviour
         dialogueText.maxVisibleCharacters = 0;
     }
 
-    void Update()
-    {
-        // E tuşuna basıldığında aç/kapat (Interact)
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            if (isOpen)
-            {
-                CloseDialogue();
-            }
-            else
-            {
-                // Parametre vermezsek default metni yazar.
-                // İstersen OpenDialogue("Farklı metin"); şeklinde başka scriptlerden çağırabilirsin.
-                OpenDialogue(defaultStoryText);
-            }
-        }
-    }
+    
 
     /// <summary>
     /// Paneli açar ve metni yazmaya başlar. Modüler kullanım için dışarıdan metin alabilir.
