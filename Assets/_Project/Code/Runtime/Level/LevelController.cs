@@ -1,14 +1,19 @@
 using System.Collections;
 using Game.Runtime.Combat;
+using Game.Runtime.Events;
 using Game.Runtime.Player;
 using UnityEngine;
 
 namespace Game.Runtime.Level
 {
     /// <summary>
-    /// Minimal level lifecycle for the M1 slice: respawn the player on death (its promised "real
-    /// restart") and declare the level complete when the <see cref="LevelExit"/> is reached.
-    /// Full app-level sequencing (upgrade screen, next level, ending) is M2's GameFlow/LevelLoader.
+    /// Per-level lifecycle. Handles the in-level feedback (freeze/tint on completion, respawn on
+    /// death) and <b>announces</b> both facts on event channels so the persistent
+    /// <see cref="RunController"/> can sequence the run (Guide §5.4 — announce facts, don't issue orders).
+    /// <para>
+    /// If no <see cref="RunController"/> is present (e.g. you press Play on a single level while
+    /// authoring), it falls back to the M1 behaviour: respawn locally instead of reloading.
+    /// </para>
     /// </summary>
     public sealed class LevelController : MonoBehaviour
     {
@@ -18,6 +23,10 @@ namespace Game.Runtime.Level
         [SerializeField] private Behaviour[] _playerControl;
         [SerializeField] private float _respawnDelaySeconds = 1.25f;
         [SerializeField] private Color _completeTint = new(0.40f, 0.90f, 0.50f);
+
+        [Header("Run channels (leave empty to stay level-local)")]
+        [SerializeField] private VoidEventChannel _levelCompleted;
+        [SerializeField] private VoidEventChannel _playerDiedChannel;
 
         private HealthComponent _health;
         private PlayerDeath _death;
@@ -51,7 +60,7 @@ namespace Game.Runtime.Level
         {
             if (_completed) return;
             _completed = true;
-            Debug.Log("[Level] COMPLETE — reached the exit! (upgrade + next-level flow arrives in M2)");
+            Debug.Log("[Level] COMPLETE — reached the exit!");
 
             if (_body != null)
             {
@@ -68,11 +77,35 @@ namespace Game.Runtime.Level
             }
 
             if (_renderer != null) _renderer.color = _completeTint;
+
+            // Announce it — the RunController advances to the next level (or ends the run).
+            if (_levelCompleted == null)
+            {
+                Debug.LogWarning($"[{nameof(LevelController)}] 'Level Completed' channel is NOT assigned — " +
+                                 "the run cannot advance. Assign it in the Inspector to chain levels.", this);
+                return;
+            }
+
+            if (RunController.Instance == null)
+            {
+                Debug.LogWarning($"[{nameof(LevelController)}] No {nameof(RunController)} in the scene — " +
+                                 "nothing is listening, so the level cannot advance.", this);
+            }
+
+            _levelCompleted.Raise();
         }
 
         private void OnPlayerDied()
         {
             if (_completed) return;
+
+            // With a run in progress, the RunController reloads the level. Standalone, respawn here.
+            if (RunController.Instance != null && _playerDiedChannel != null)
+            {
+                _playerDiedChannel.Raise();
+                return;
+            }
+
             StartCoroutine(Respawn());
         }
 
