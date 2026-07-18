@@ -1,4 +1,5 @@
 using Game.Core.Combat;
+using Game.Runtime.Presentation;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -14,6 +15,10 @@ namespace Game.Runtime.Combat
     {
         [SerializeField] private float _lifetimeSeconds = 2f;
         [SerializeField] private int _damage = 1;
+
+        [Header("Gamefeel")]
+        [Tooltip("Freeze-frame length on a damaging hit. 0 disables the hit-stop for this bullet.")]
+        [SerializeField] private float _hitStopSeconds = 0.04f;
 
         private Rigidbody2D _body;
         private IObjectPool<Bullet> _pool;
@@ -55,9 +60,23 @@ namespace Game.Runtime.Combat
         {
             if (other.gameObject == _owner) return;
 
+            bool damaged = false;
             if (other.TryGetComponent<IDamageable>(out var damageable) && damageable.IsAlive)
             {
                 damageable.ApplyDamage(_damage);
+                damaged = true;
+            }
+
+            // Every impact gets a light burst; only a landed hit earns a freeze frame, so walls
+            // stay cheap to shoot and enemies feel solid.
+            if (ImpactFlashPool.Instance != null)
+            {
+                ImpactFlashPool.Instance.Spawn(transform.position);
+            }
+
+            if (damaged && _hitStopSeconds > 0f)
+            {
+                HitStop.Play(_hitStopSeconds);
             }
 
             Despawn();
