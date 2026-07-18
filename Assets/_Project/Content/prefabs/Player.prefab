@@ -336,7 +336,7 @@ MonoBehaviour:
   _walkSpeedUnitsPerSecond: 6
   _groundAccelerationUnitsPerSecondSq: 60
   _airAccelerationUnitsPerSecondSq: 30
-  _jumpSpeedUnitsPerSecond: 12
+  _jumpSpeedUnitsPerSecond: 14.2
   _jumpCutMultiplier: 0.5
   _coyoteTimeSeconds: 0.1
   _jumpBufferSeconds: 0.1
