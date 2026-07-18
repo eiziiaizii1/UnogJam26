@@ -23,20 +23,47 @@ namespace Game.Runtime.Presentation
 
         private Vector3 _velocity;
 
+        // Screen shake fields
+        private Vector3 _shakeOffset;
+        private float _shakeIntensity;
+        private float _shakeDecay;
+
         /// <summary>Assigns the transform to follow (used by the sandbox builder / spawners).</summary>
         public void SetTarget(Transform target) => _target = target;
+
+        /// <summary>Starts a screen shake effect with given intensity and decay rate.</summary>
+        public void Shake(float intensity, float decay = 5f)
+        {
+            _shakeIntensity = intensity;
+            _shakeDecay = decay;
+        }
 
         private void LateUpdate()
         {
             if (_target == null) return;
 
             Vector3 current = transform.position;
+            // Subtract previous shake offset so the camera follow path calculation doesn't drift
+            current -= _shakeOffset;
+
             Vector3 desired = _target.position + _offset;
 
             float x = Mathf.SmoothDamp(current.x, desired.x, ref _velocity.x, _horizontalSmoothTime);
             float y = Mathf.SmoothDamp(current.y, desired.y, ref _velocity.y, _verticalSmoothTime);
 
-            transform.position = new Vector3(x, y, desired.z);
+            // Update screen shake offset
+            if (_shakeIntensity > 0.01f)
+            {
+                _shakeOffset = Random.insideUnitSphere * _shakeIntensity;
+                _shakeOffset.z = 0f; // Keep Z axis intact for 2D perspective
+                _shakeIntensity = Mathf.MoveTowards(_shakeIntensity, 0f, _shakeDecay * Time.deltaTime);
+            }
+            else
+            {
+                _shakeOffset = Vector3.zero;
+            }
+
+            transform.position = new Vector3(x, y, desired.z) + _shakeOffset;
         }
     }
 }
