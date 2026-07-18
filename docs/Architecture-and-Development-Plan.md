@@ -218,7 +218,15 @@ Plus: Git LFS wired for binary asset types in `.gitattributes` (§11.12).
 - **Slice 4 — collectible:** first concrete `EventChannel` use, done as a **ScriptableObject channel asset** (§11.4): `Runtime/Events/IntEventChannel` (wraps Core `EventChannel<int>`). `Runtime/Collectibles/Collectible` (trigger; on `PlayerCollector` overlap → `Raise(value)` + despawn + bob) and `Runtime/Collectibles/PlayerCollector` (typed marker + tallies `Total` by subscribing to the channel; unsubscribes in OnDisable). Sandbox creates a `CollectiblePicked` channel asset, wires the player's collector, and scatters 4 pickups (one requires a jump).
 - **Slice 5 — level-end trigger (closes the loop):** `Runtime/Level/LevelExit` (goal-zone trigger; raises `Reached` when the player enters) + `Runtime/Level/LevelController` (respawns the player on death — its real restart — and freezes/greens the player on completion). `HealthComponent.ResetToFull` + `PlayerDeath.Revive` added for respawn. Sandbox places a blue exit at the far right past the crates and wires the controller. **Deviation (§13.7):** app-level `GameFlow` sequencing (Gameplay→Upgrade→next/Ending) stays in M2 — `LevelExit.Reached` is the seam M2's LevelLoader/GameFlow will consume.
 - `Editor/Sandbox/PlayerSandboxBuilder` — `Tools ▸ Build Player Sandbox` (idempotent): sprite + scenery (ground + background markers) + bullet prefab + pool + wired player + camera-follow wired to the player. Re-running refreshes the sandbox.
-- `Game.Runtime.asmdef` references `Unity.InputSystem`.
+- `Game.Runtime.asmdef` references `Unity.InputSystem` and `PrimeTween.Runtime`.
+- **Slice 6 — Audio / SFX Layer:** Pooled `SfxPlayer` scene service + data-driven `SfxDefinition` ScriptableObject + gameplay event hook components.
+  - `Runtime/Audio/SfxDefinition` (volume, pitchMin/Max, mixer group; implements `IValidatable`).
+  - `Runtime/Audio/PooledAudioSource` (auto-recycles to pool when clip duration ends).
+  - `Runtime/Audio/SfxPlayer` (holds pre-warmed AudioSource pool and central pickup event hook).
+  - `Runtime/Audio/HealthAudio` (subscribes to `HealthComponent` to play hit/death sounds).
+  - `Runtime/Audio/PlayerAudio` (subscribes to player's `InputReader` to play jump sounds).
+  - Wired shoot sound hook directly in `Shooter.cs`.
+  - Added SfxDefinition assets (`Sfx_Shoot`, `Sfx_Jump`, `Sfx_Hit`, `Sfx_Death`, `Sfx_Pickup`) and `PlaceholderSilence.wav` under `Assets/_Project/Data/Audio/`.
 
 **Scope notes:** **walk only** (no sprint) per your direction. Shooting kept as its own component (declined to weld into one script — that is the §10.1 god-object smell); say the word to merge if you disagree.
 

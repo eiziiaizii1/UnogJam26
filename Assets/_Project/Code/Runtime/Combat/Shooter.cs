@@ -31,6 +31,9 @@ namespace Game.Runtime.Combat
         [SerializeField] private GameObject _muzzleFlashLight;
         [SerializeField] private float _flashDuration = 0.05f; // Işığın aktif kalma süresi
 
+        [Header("Audio")]
+        [SerializeField] private Game.Runtime.Audio.SfxDefinition _shootSfx;
+
         private Rigidbody2D _rigidbody;
         private float _nextFireTime;
         private float _facing = 1f;
@@ -97,6 +100,12 @@ namespace Game.Runtime.Combat
                     StopCoroutine(_flashCoroutine);
                 }
                 _flashCoroutine = StartCoroutine(FlashLightRoutine());
+            }
+
+            // Atış ses efekti (Shoot SFX)
+            if (_shootSfx != null && Game.Runtime.Audio.SfxPlayer.Instance != null)
+            {
+                Game.Runtime.Audio.SfxPlayer.Instance.Play(_shootSfx);
             }
         }
 

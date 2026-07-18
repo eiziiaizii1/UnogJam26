@@ -1,0 +1,107 @@
+using UnityEngine;
+using UnityEngine.Pool;
+using Game.Runtime.Events;
+
+namespace Game.Runtime.Audio
+{
+    /// <summary>
+    /// Central scene service that manages a pre-warmed pool of <see cref="PooledAudioSource"/>s.
+    /// Observers can play SFX cues. Automatically handles central event hooks like Pickups.
+    /// </summary>
+    public sealed class SfxPlayer : MonoBehaviour
+    {
+        public static SfxPlayer Instance { get; private set; }
+
+        [Header("Pool Settings")]
+        [SerializeField] private int _prewarmCount = 12;
+        [SerializeField] private int _maxSize = 48;
+
+        [Header("Pickup Event Hook")]
+        [SerializeField] private IntEventChannel _collectiblePickedChannel;
+        [SerializeField] private SfxDefinition _pickupSfx;
+
+        private IObjectPool<PooledAudioSource> _pool;
+
+        private void Awake()
+        {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            _pool = new ObjectPool<PooledAudioSource>(
+                createFunc: CreateAudioSourceInstance,
+                actionOnGet: s => s.gameObject.SetActive(true),
+                actionOnRelease: s => s.gameObject.SetActive(false),
+                actionOnDestroy: s => Destroy(s.gameObject),
+                collectionCheck: false,
+                defaultCapacity: _prewarmCount,
+                maxSize: _maxSize
+            );
+
+            Prewarm();
+        }
+
+        private void OnEnable()
+        {
+            if (_collectiblePickedChannel != null)
+            {
+                _collectiblePickedChannel.Subscribe(OnCollectiblePicked);
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (_collectiblePickedChannel != null)
+            {
+                _collectiblePickedChannel.Unsubscribe(OnCollectiblePicked);
+            }
+        }
+
+        private void Prewarm()
+        {
+            var warmed = new PooledAudioSource[_prewarmCount];
+            for (int i = 0; i < _prewarmCount; i++) warmed[i] = _pool.Get();
+            for (int i = 0; i < _prewarmCount; i++) _pool.Release(warmed[i]);
+        }
+
+        private PooledAudioSource CreateAudioSourceInstance()
+        {
+            var go = new GameObject("PooledAudioSource");
+            go.transform.SetParent(transform);
+            
+            var audioSource = go.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+            audioSource.spatialBlend = 0f; // Force 2D sound for jam UI / gameplay feedback
+
+            var pooled = go.AddComponent<PooledAudioSource>();
+            return pooled;
+        }
+
+        /// <summary>
+        /// Plays a sound cue from the pre-warmed AudioSource pool.
+        /// </summary>
+        public void Play(SfxDefinition cue)
+        {
+            if (cue == null) return;
+
+            var clip = cue.GetRandomClip();
+            if (clip == null) return;
+
+            float pitch = Random.Range(cue.PitchMin, cue.PitchMax);
+            
+            var source = _pool.Get();
+            source.Play(clip, cue.Volume, pitch, cue.OutputGroup, _pool);
+        }
+
+        private void OnCollectiblePicked(int amount)
+        {
+            Play(_pickupSfx);
+        }
+    }
+}
