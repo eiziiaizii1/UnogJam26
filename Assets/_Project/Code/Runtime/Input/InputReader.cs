@@ -27,6 +27,9 @@ namespace Game.Runtime.Input
         /// <summary>True while the fire button is held (the shooter auto-fires at its own rate).</summary>
         public bool FireHeld { get; private set; }
 
+        /// <summary>Raised the frame the interact button goes down (talk to a carcass, read a sign).</summary>
+        public event Action InteractPressed;
+
         private void Awake()
         {
             _controls = new GameControls();
@@ -37,13 +40,20 @@ namespace Game.Runtime.Input
             _controls.Player.Enable();
             _controls.Player.Jump.performed += OnJumpPerformed;
             _controls.Player.Jump.canceled += OnJumpCanceled;
+            _controls.Player.Interact.performed += OnInteractPerformed;
         }
 
         private void OnDisable()
         {
             _controls.Player.Jump.performed -= OnJumpPerformed;
             _controls.Player.Jump.canceled -= OnJumpCanceled;
+            _controls.Player.Interact.performed -= OnInteractPerformed;
             _controls.Player.Disable();
+
+            // Stale intents would otherwise survive the disable and fire on re-enable
+            // (dialogue toggles this component, so it happens constantly).
+            Move = Vector2.zero;
+            FireHeld = false;
         }
 
         private void Update()
@@ -55,6 +65,8 @@ namespace Game.Runtime.Input
         private void OnJumpPerformed(InputAction.CallbackContext context) => JumpPressed?.Invoke();
 
         private void OnJumpCanceled(InputAction.CallbackContext context) => JumpReleased?.Invoke();
+
+        private void OnInteractPerformed(InputAction.CallbackContext context) => InteractPressed?.Invoke();
 
         private void OnDestroy()
         {
