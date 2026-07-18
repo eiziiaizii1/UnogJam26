@@ -252,3 +252,25 @@ The M1 `PlayerSandboxBuilder` generated the player/scenery/prefabs **from code**
 - Replace the code-built sandbox with authored **prefabs** (player, enemy, crate, collectible, exit) + a saved Level scene; keep `EnemyDefinition` data-driven and add the generic **enemy factory** deferred in 3a.
 - Add the **HUD** (health + collectible `Total`), replacing the debug logs and `DamageFlash` stand-in feedback.
 - Integrate the teammate's juice (screen shake, recoil, muzzle flash, VFX/SFX) onto the real prefabs.
+
+### M2 — Progression & Upgrades · *in progress*
+
+Deltas at kickoff: levels/prefabs are hand-authored (Claude ships `.cs` + SOs only); **environment degradation needs no code** (authored per scene); HUD partly done (friend's health bar + `HealthBarPresenter`); the 3a enemy factory is now likely permanently unnecessary since designers place enemies by hand.
+
+**Slice M2a — run sequencing (done):**
+- `Core/Run/RunState` — pure run progress (level index, collectibles, applied upgrades); 5 unit tests.
+- `Runtime/Events/VoidEventChannel` — payload-free SO channel (companion to `IntEventChannel`).
+- `Runtime/Level/LevelSequence` — authored scene order, `IValidatable`.
+- `Runtime/Level/RunController` — persistent (DontDestroyOnLoad + duplicate guard); owns `RunState`, subscribes to the level-completed / player-died / collectible channels, advances or reloads.
+- `LevelController` refactored to **announce** completion/death on channels (§5.4) with a level-local fallback when no `RunController` exists, so single-level authoring still works.
+
+**Slice M2b — upgrades (done):**
+- `Runtime/Upgrades/UpgradeDefinition` — authored per-level upgrade (id, label, bonus max health / walk / jump), `IValidatable`.
+- `Runtime/Upgrades/UpgradeService` — stateless application to a player instance.
+- `LevelSequence` restructured to `LevelEntry[] { SceneName, UpgradeOnEnter }` (**breaking**: scene names must be re-entered).
+- `RunController` hooks `SceneManager.sceneLoaded` and **re-applies every earned upgrade cumulatively on each load** — each level is a fresh scene with a fresh player, so a one-shot apply would reset the robot to base stats every level. Records the upgrade once per *advance* (not per reload) so the run list stays accurate.
+- Mutators added: `HealthComponent.AddMaxHealth` (rescales the health bar via notify) and `PlayerMotor.AddSpeedBonuses`.
+
+*Deferred:* fire-rate and bullet-damage upgrades — damage lives on the bullet prefab and fire rate in `Shooter` (teammate's file), so both need a small cross-file change. Data model already supports adding them.
+
+Next: **M2c** level-up indicator.

@@ -382,6 +382,56 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &283940541
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 283940543}
+  - component: {fileID: 283940542}
+  m_Layer: 0
+  m_Name: RunController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &283940542
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 283940541}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56a5cf9f28ede554880d91aed0b98731, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _levels: {fileID: 11400000, guid: 0dab45fa835fc904c9e6dd13cffb1177, type: 2}
+  _levelCompleted: {fileID: 11400000, guid: 78f3ed4832a2d5842b05b91577eaa22f, type: 2}
+  _playerDied: {fileID: 11400000, guid: d4a422a991a6a494abbf82200f09c3b0, type: 2}
+  _collectiblePicked: {fileID: 0}
+  _levelCompleteDelaySeconds: 1.2
+  _respawnDelaySeconds: 1.2
+--- !u!4 &283940543
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 283940541}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4.2701015, y: -1.1218363, z: 0.6155983}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &291128778
 GameObject:
   m_ObjectHideFlags: 0
@@ -876,6 +926,8 @@ MonoBehaviour:
   - {fileID: 901319598}
   _respawnDelaySeconds: 1.25
   _completeTint: {r: 0.4, g: 0.9, b: 0.5, a: 1}
+  _levelCompleted: {fileID: 0}
+  _playerDiedChannel: {fileID: 0}
 --- !u!114 &815766294 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3444076839348938416, guid: 3aa0402302389d249910ea57b72e8e0b, type: 3}
@@ -1236,6 +1288,57 @@ Transform:
   - {fileID: 1951567289}
   - {fileID: 1501965546}
   - {fileID: 606048144}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1231758331
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1231758333}
+  - component: {fileID: 1231758332}
+  m_Layer: 0
+  m_Name: LevelController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1231758332
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1231758331}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f6c2ae598f4f1540a45428ce66b1b61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _player: {fileID: 6678838544758022657, guid: 184a21df94dd6d147918e0a1f73743e3, type: 3}
+  _exit: {fileID: 5252266206194400399, guid: 01b670155d068754285e41929e3a4af6, type: 3}
+  _playerControl: []
+  _respawnDelaySeconds: 1.25
+  _completeTint: {r: 0.4, g: 0.9, b: 0.5, a: 1}
+  _levelCompleted: {fileID: 11400000, guid: 78f3ed4832a2d5842b05b91577eaa22f, type: 2}
+  _playerDiedChannel: {fileID: 11400000, guid: d4a422a991a6a494abbf82200f09c3b0, type: 2}
+--- !u!4 &1231758333
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1231758331}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4.2701015, y: -1.1218363, z: 0.6155983}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1261239394
@@ -2259,7 +2362,8 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4839241443289239639, guid: d4bda47d221e0974081ce1e3934a7027, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -2622,3 +2726,5 @@ SceneRoots:
   - {fileID: 9175107523338391802}
   - {fileID: 1435094770062080678}
   - {fileID: 815537660521278895}
+  - {fileID: 1231758333}
+  - {fileID: 283940543}

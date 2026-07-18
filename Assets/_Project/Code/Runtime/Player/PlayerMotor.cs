@@ -44,6 +44,13 @@ namespace Game.Runtime.Player
             _body.freezeRotation = true;
         }
 
+        /// <summary>Applied by upgrades — additive on top of the authored base values.</summary>
+        public void AddSpeedBonuses(float walkBonus, float jumpBonus)
+        {
+            _walkSpeedUnitsPerSecond += Mathf.Max(0f, walkBonus);
+            _jumpSpeedUnitsPerSecond += Mathf.Max(0f, jumpBonus);
+        }
+
         private void OnEnable()
         {
             if (_input == null) return;

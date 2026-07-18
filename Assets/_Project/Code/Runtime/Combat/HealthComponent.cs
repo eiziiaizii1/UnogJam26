@@ -50,6 +50,13 @@ namespace Game.Runtime.Combat
             Build(_maxHealth, notify: true);
         }
 
+        /// <summary>Raises max HP (upgrades) and restores to full. Notifies so the health bar rescales.</summary>
+        public void AddMaxHealth(int bonus)
+        {
+            if (bonus <= 0) return;
+            Build(_maxHealth + bonus, notify: true);
+        }
+
         public void ApplyDamage(int amount)
         {
             _health.TakeDamage(amount);

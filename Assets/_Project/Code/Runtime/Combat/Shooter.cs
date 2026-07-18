@@ -103,7 +103,6 @@ namespace Game.Runtime.Combat
             }
 
             // Atış ses efekti (Shoot SFX)
-            Debug.Log("anan");
             if (_shootSfx != null && Game.Runtime.Audio.SfxPlayer.Instance != null)
             {
                 Game.Runtime.Audio.SfxPlayer.Instance.Play(_shootSfx);
