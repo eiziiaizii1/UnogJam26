@@ -13,9 +13,13 @@ using UnityEngine;
 namespace Game.Editor.Sandbox
 {
     /// <summary>
-    /// One-click greybox sandbox for feel testing (Guide §13.4). Generates a placeholder
-    /// square sprite, a ground platform, a bullet prefab + pool, and a fully-wired player, so
-    /// walk + jump + shoot can be exercised immediately. Everything is throwaway M1 scaffolding.
+    /// DEPRECATED — M1 greybox scaffolding, kept only to generate a throwaway test scene.
+    /// <para>
+    /// Levels, prefabs and component wiring are now authored <b>by hand in the editor</b> (Guide §9
+    /// promotion rule, §11.5). This tool is deliberately non-destructive: it never deletes scene
+    /// objects and never overwrites an existing prefab, so it cannot clobber authored work.
+    /// Delete this file once the prefabs have been harvested.
+    /// </para>
     /// </summary>
     public static class PlayerSandboxBuilder
     {
@@ -28,10 +32,19 @@ namespace Game.Editor.Sandbox
         private static readonly Color NatureColor = new(0.36f, 0.62f, 0.30f);
         private static readonly Color LaserColor = new(1f, 0.85f, 0.30f);
 
-        [MenuItem("Tools/IloveNature/Build Player Sandbox")]
+        [MenuItem("Tools/IloveNature/[Deprecated] Generate Greybox Sandbox")]
         public static void BuildPlayerSandbox()
         {
-            ClearPreviousSandbox();
+            if (!EditorUtility.DisplayDialog(
+                    "Generate Greybox Sandbox (deprecated)",
+                    "This was M1 scaffolding. Levels and prefabs are now authored by hand in the editor.\n\n" +
+                    "It only ADDS greybox objects to the CURRENT scene. It will not delete scene objects " +
+                    "and will not overwrite existing prefabs.\n\n" +
+                    "Run it only in a scratch scene.",
+                    "Generate", "Cancel"))
+            {
+                return;
+            }
 
             var sprite = GetOrCreateSquareSprite();
             var cameraGo = EnsureCamera();
@@ -54,23 +67,6 @@ namespace Game.Editor.Sandbox
 
             Selection.activeGameObject = player;
             Debug.Log("[PlayerSandbox] Sandbox built. A/D walk, Space jump, J/mouse shoot. Left = enemy, right = crates → reach the blue exit at the far right. Die = respawn after a moment.");
-        }
-
-        private static void ClearPreviousSandbox()
-        {
-            foreach (var motor in Object.FindObjectsByType<PlayerMotor>(FindObjectsSortMode.None))
-            {
-                Undo.DestroyObjectImmediate(motor.gameObject);
-            }
-            foreach (var pool in Object.FindObjectsByType<BulletPool>(FindObjectsSortMode.None))
-            {
-                Undo.DestroyObjectImmediate(pool.gameObject);
-            }
-            var scenery = GameObject.Find("Sandbox");
-            if (scenery != null)
-            {
-                Undo.DestroyObjectImmediate(scenery);
-            }
         }
 
         private static GameObject CreatePlayer(Sprite sprite, BulletPool pool, IntEventChannel collectibleChannel)
@@ -139,7 +135,7 @@ namespace Game.Editor.Sandbox
                 new(1.5f, -1.5f, 0f),
                 new(-3f, -1.5f, 0f),
                 new(-6f, -1.5f, 0f),
-                new(0f, 0.3f, 0f), // above the ground — needs a jump
+                new(-2f, 0.3f, 0f), // above the ground — needs a jump (kept clear of the player spawn at x=0)
             };
 
             foreach (var position in positions)
@@ -194,7 +190,10 @@ namespace Game.Editor.Sandbox
 
         private static GameObject BuildBulletPrefab(Sprite sprite)
         {
-            // Always rebuilt so the sandbox reflects current component code, not a stale prefab.
+            // NEVER overwrite: prefabs are hand-authored now, so an existing one always wins.
+            var existing = AssetDatabase.LoadAssetAtPath<GameObject>(BulletPrefabPath);
+            if (existing != null) return existing;
+
             Directory.CreateDirectory(Path.GetDirectoryName(BulletPrefabPath));
 
             var temp = new GameObject("Bullet");
@@ -340,7 +339,10 @@ namespace Game.Editor.Sandbox
 
         private static GameObject BuildEnemyPrefab(Sprite sprite, EnemyDefinition definition)
         {
-            // Always rebuilt so the sandbox reflects current component code, not a stale prefab.
+            // NEVER overwrite: prefabs are hand-authored now, so an existing one always wins.
+            var existing = AssetDatabase.LoadAssetAtPath<GameObject>(EnemyPrefabPath);
+            if (existing != null) return existing;
+
             Directory.CreateDirectory(Path.GetDirectoryName(EnemyPrefabPath));
 
             var temp = new GameObject("Enemy");

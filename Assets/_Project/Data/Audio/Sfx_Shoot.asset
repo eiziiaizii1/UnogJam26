@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Sfx_Shoot
   m_EditorClassIdentifier: 
   _clips:
-  - {fileID: 8300000, guid: 1f51a700d23c4a45a278d59fa9432f86, type: 3}
+  - {fileID: 8300000, guid: 1b57e748f62e8d14aad438e57b73f676, type: 3}
   _volume: 0.8
   _pitchMin: 0.9
   _pitchMax: 1.1

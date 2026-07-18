@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Sfx_Death
   m_EditorClassIdentifier: 
   _clips:
-  - {fileID: 8300000, guid: 1f51a700d23c4a45a278d59fa9432f86, type: 3}
+  - {fileID: 8300000, guid: 9973ba510fb920e43b7f53a69684546e, type: 3}
   _volume: 1
   _pitchMin: 0.9
   _pitchMax: 1.1

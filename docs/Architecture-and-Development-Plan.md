@@ -239,6 +239,15 @@ Plus: Git LFS wired for binary asset types in `.gitattributes` (§11.12).
 
 **Next → M2 (Progression & Upgrades):** promote the sandbox to a real, saved level scene; introduce the composition-root-owned `LevelController`/`LevelLoader` and route `LevelExit.Reached` + `PlayerDeath.Died` through `GameFlow`; auto-apply a predetermined per-level upgrade on transition with the level-up indicator; chain two authored environments. Also the graduation-hardening items below.
 
+### Authoring model — decided at the M1→M2 boundary (supersedes the codegen sandbox)
+
+The M1 `PlayerSandboxBuilder` generated the player/scenery/prefabs **from code**. That was correct while there was no editor access and no content to protect, but it is destructive by nature: it deleted scene objects and overwrote prefab assets on every run — which would wipe hand-placed level design and collide with a second developer authoring scenes directly. Trigger case: the SFX components (`SfxPlayer`, `HealthAudio`, `PlayerAudio`) all require Inspector wiring that the builder would erase.
+
+**Decision (§9 promotion rule, §11.5):**
+- **Levels, prefabs, and component wiring are authored by hand in the Unity editor.** Ground/platforms use the Tilemap package.
+- **Claude touches `.cs` only** — components, systems, ScriptableObject definitions, tests. It does not write scripts that create or overwrite scenes/prefabs. When code needs a component on a prefab, Claude writes the component and states where to add it.
+- The builder is **retired**: menu renamed `[Deprecated] Generate Greybox Sandbox`, gated behind a confirmation, no longer deletes scene objects, and never overwrites an existing prefab. Delete the file once prefabs are harvested.
+
 **M1→M2 hardening backlog** (promote greybox to real, per §9 promotion rule):
 - Replace the code-built sandbox with authored **prefabs** (player, enemy, crate, collectible, exit) + a saved Level scene; keep `EnemyDefinition` data-driven and add the generic **enemy factory** deferred in 3a.
 - Add the **HUD** (health + collectible `Total`), replacing the debug logs and `DamageFlash` stand-in feedback.

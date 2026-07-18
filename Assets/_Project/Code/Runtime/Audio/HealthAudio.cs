@@ -25,7 +25,7 @@ namespace Game.Runtime.Audio
         {
             _health.Changed += OnHealthChanged;
             _health.Died += OnHealthDied;
-            _lastHealth = -1; // Reset to fetch initial state on first change
+            _lastHealth = _health.Current; // seed from real HP so the FIRST hit still plays
         }
 
         private void OnDisable()
@@ -36,12 +36,6 @@ namespace Game.Runtime.Audio
 
         private void OnHealthChanged(int current, int max)
         {
-            if (_lastHealth == -1)
-            {
-                _lastHealth = current;
-                return;
-            }
-
             // Only play hit SFX if health decreased (we took damage, not healed)
             if (current < _lastHealth)
             {

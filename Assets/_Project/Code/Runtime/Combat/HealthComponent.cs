@@ -23,6 +23,12 @@ namespace Game.Runtime.Combat
 
         public bool IsAlive => _health?.IsAlive ?? true;
 
+        /// <summary>Current hit points (for listeners/HUD to seed or display state).</summary>
+        public int Current => _health?.Current ?? _maxHealth;
+
+        /// <summary>Maximum hit points.</summary>
+        public int Max => _health?.Max ?? _maxHealth;
+
         private void Awake()
         {
             // Skip if a spawner already configured us via SetMaxHealth (data-driven enemies).

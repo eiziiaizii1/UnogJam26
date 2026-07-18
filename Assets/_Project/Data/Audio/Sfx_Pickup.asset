@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Sfx_Pickup
   m_EditorClassIdentifier: 
   _clips:
-  - {fileID: 8300000, guid: 1f51a700d23c4a45a278d59fa9432f86, type: 3}
+  - {fileID: 8300000, guid: d0b41ab4dcf8d7545bd10ff933ed2c7f, type: 3}
   _volume: 0.9
-  _pitchMin: 1.0
+  _pitchMin: 1
   _pitchMax: 1.2
   _outputGroup: {fileID: 0}
