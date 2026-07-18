@@ -203,7 +203,7 @@ Plus: Git LFS wired for binary asset types in `.gitattributes` (§11.12).
 
 **Next:** on green, proceed to **M1 Vertical Slice** (§8) — Input System + PlayerMotor, pooled shooting, one data-driven enemy, one destructible, camera follow, one collectible, level-end trigger; prove feel.
 
-### M1 — Vertical Slice · *in progress: movement, shoot, camera, damage, enemy, contact-damage done*
+### M1 — Vertical Slice · *feature-complete (pending final playtest sign-off)*
 
 **Delivered (input + movement + shooting)**
 - `Settings/Input/GameControls.inputactions` — Player map: `Move` (Vector2; WASD/arrows/left-stick), `Jump` (Button; Space/gamepad south), `Fire` (Button; left-mouse/J/gamepad RT). **C# wrapper generation enabled** → Unity generates `Code/Runtime/Input/GameControls.cs` on import.
@@ -214,6 +214,9 @@ Plus: Git LFS wired for binary asset types in `.gitattributes` (§11.12).
 - `Core/Combat/{Health, IDamageable}` — pure damage model + narrow damage contract; 7 unit tests (`HealthTests`). `Runtime/Combat/HealthComponent` (adapter implementing `IDamageable`, re-broadcasts Died/Changed) + `Runtime/Combat/DestroyOnDeath` (reusable death reaction). `Bullet` now applies `_damage` to any `IDamageable` on hit. Sandbox spawns 3 solid crates (3 HP) that block and can be shot to clear.
 - **Slice 3a — data-driven enemy:** `Runtime/Enemies/EnemyDefinition` (ScriptableObject archetype/Flyweight; hp, speed, contactDamage, patrol, tint, size; implements `IValidatable` → exercised by `Tools ▸ Validate Data`) + `Runtime/Enemies/EnemyController` (applies the archetype at spawn, patrols; reuses `HealthComponent`/`DestroyOnDeath`). `HealthComponent.SetMaxHealth` lets data drive HP. Sandbox creates a `Critter` definition + base enemy prefab and spawns one to the left. **Deviation (§13.7):** the generic wave *factory* is deferred to M3 — for now the definition is a serialized ref on the prefab and `EnemyController` self-applies.
 - **Slice 3b — contact damage + player health:** `Runtime/Combat/ContactDamage` (reusable hazard; damages any `IDamageable` on contact on a cooldown; enemy pushes its `EnemyDefinition.ContactDamage` in). Player now has a `HealthComponent` (5 HP). `Runtime/Player/PlayerDeath` — **stub**: on death disables motor/shooter/input, dims the sprite, raises `Died` (real restart deferred to slice 5 / GameFlow). `Runtime/Combat/DamageFlash` — reusable coroutine hit-flash for feedback until the HUD exists (on player + enemy). Player death flow: touch enemy → lose HP on interval → at 0, control off + dimmed.
+  - *Builder fix:* generated prefabs (`Enemy`, `Bullet`) now **always rebuild** (`BuildEnemyPrefab`/`BuildBulletPrefab`) — the old GetOrCreate cache served stale prefabs missing newly-added components.
+- **Slice 4 — collectible:** first concrete `EventChannel` use, done as a **ScriptableObject channel asset** (§11.4): `Runtime/Events/IntEventChannel` (wraps Core `EventChannel<int>`). `Runtime/Collectibles/Collectible` (trigger; on `PlayerCollector` overlap → `Raise(value)` + despawn + bob) and `Runtime/Collectibles/PlayerCollector` (typed marker + tallies `Total` by subscribing to the channel; unsubscribes in OnDisable). Sandbox creates a `CollectiblePicked` channel asset, wires the player's collector, and scatters 4 pickups (one requires a jump).
+- **Slice 5 — level-end trigger (closes the loop):** `Runtime/Level/LevelExit` (goal-zone trigger; raises `Reached` when the player enters) + `Runtime/Level/LevelController` (respawns the player on death — its real restart — and freezes/greens the player on completion). `HealthComponent.ResetToFull` + `PlayerDeath.Revive` added for respawn. Sandbox places a blue exit at the far right past the crates and wires the controller. **Deviation (§13.7):** app-level `GameFlow` sequencing (Gameplay→Upgrade→next/Ending) stays in M2 — `LevelExit.Reached` is the seam M2's LevelLoader/GameFlow will consume.
 - `Editor/Sandbox/PlayerSandboxBuilder` — `Tools ▸ Build Player Sandbox` (idempotent): sprite + scenery (ground + background markers) + bullet prefab + pool + wired player + camera-follow wired to the player. Re-running refreshes the sandbox.
 - `Game.Runtime.asmdef` references `Unity.InputSystem`.
 
@@ -224,4 +227,11 @@ Plus: Git LFS wired for binary asset types in `.gitattributes` (§11.12).
 2. `Tools ▸ IloveNature ▸ Build Player Sandbox`.
 3. **Play** → `A`/`D` walk, `Space` jump, **`J` or left-mouse shoot** (bullets fly the way you last moved). Tune `PlayerMotor` and `Shooter` inspectors live.
 
-**Remaining M1:** one collectible (first real `EventChannel` use → HUD/score later), level-end trigger (raises `LevelCompleted` → GameFlow, closes the loop).
+**M1 core loop is closed:** walk/jump/shoot → break crates / kill enemy → collect pickups → reach the exit = complete; die = respawn. All in greybox.
+
+**Next → M2 (Progression & Upgrades):** promote the sandbox to a real, saved level scene; introduce the composition-root-owned `LevelController`/`LevelLoader` and route `LevelExit.Reached` + `PlayerDeath.Died` through `GameFlow`; auto-apply a predetermined per-level upgrade on transition with the level-up indicator; chain two authored environments. Also the graduation-hardening items below.
+
+**M1→M2 hardening backlog** (promote greybox to real, per §9 promotion rule):
+- Replace the code-built sandbox with authored **prefabs** (player, enemy, crate, collectible, exit) + a saved Level scene; keep `EnemyDefinition` data-driven and add the generic **enemy factory** deferred in 3a.
+- Add the **HUD** (health + collectible `Total`), replacing the debug logs and `DamageFlash` stand-in feedback.
+- Integrate the teammate's juice (screen shake, recoil, muzzle flash, VFX/SFX) onto the real prefabs.

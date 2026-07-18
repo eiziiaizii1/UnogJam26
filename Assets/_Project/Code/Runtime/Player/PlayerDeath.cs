@@ -18,6 +18,7 @@ namespace Game.Runtime.Player
         [SerializeField] private Color _deadColor = new(0.2f, 0.2f, 0.2f);
 
         private HealthComponent _health;
+        private Color _originalColor;
 
         /// <summary>Raised once when the player dies (for GameFlow to observe later).</summary>
         public event Action Died;
@@ -26,6 +27,7 @@ namespace Game.Runtime.Player
         {
             _health = GetComponent<HealthComponent>();
             if (_renderer == null) _renderer = GetComponent<SpriteRenderer>();
+            if (_renderer != null) _originalColor = _renderer.color;
         }
 
         private void OnEnable() => _health.Died += HandleDied;
@@ -46,6 +48,20 @@ namespace Game.Runtime.Player
 
             if (_renderer != null) _renderer.color = _deadColor;
             Died?.Invoke();
+        }
+
+        /// <summary>Re-enables control and restores the sprite (used on respawn).</summary>
+        public void Revive()
+        {
+            if (_disableOnDeath != null)
+            {
+                foreach (var behaviour in _disableOnDeath)
+                {
+                    if (behaviour != null) behaviour.enabled = true;
+                }
+            }
+
+            if (_renderer != null) _renderer.color = _originalColor;
         }
     }
 }

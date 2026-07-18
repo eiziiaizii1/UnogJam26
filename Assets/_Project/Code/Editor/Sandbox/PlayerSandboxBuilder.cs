@@ -1,7 +1,10 @@
 using System.IO;
+using Game.Runtime.Collectibles;
 using Game.Runtime.Combat;
 using Game.Runtime.Enemies;
+using Game.Runtime.Events;
 using Game.Runtime.Input;
+using Game.Runtime.Level;
 using Game.Runtime.Player;
 using Game.Runtime.Presentation;
 using UnityEditor;
@@ -20,6 +23,7 @@ namespace Game.Editor.Sandbox
         private const string BulletPrefabPath = "Assets/_Project/Content/Combat/Bullet.prefab";
         private const string EnemyDefinitionPath = "Assets/_Project/Data/Enemies/Critter.asset";
         private const string EnemyPrefabPath = "Assets/_Project/Content/Enemies/Enemy.prefab";
+        private const string CollectibleChannelPath = "Assets/_Project/Data/Events/CollectiblePicked.asset";
         private static readonly Color RobotColor = new(0.25f, 0.28f, 0.32f);
         private static readonly Color NatureColor = new(0.36f, 0.62f, 0.30f);
         private static readonly Color LaserColor = new(1f, 0.85f, 0.30f);
@@ -33,17 +37,23 @@ namespace Game.Editor.Sandbox
             var cameraGo = EnsureCamera();
             var sandboxRoot = CreateScenery(sprite);
 
+            var collectibleChannel = GetOrCreateCollectibleChannel();
+            SpawnCollectibles(sandboxRoot, sprite, collectibleChannel);
+
             var enemyDefinition = GetOrCreateEnemyDefinition();
             var enemyPrefab = BuildEnemyPrefab(sprite, enemyDefinition);
             SpawnEnemy(enemyPrefab, sandboxRoot);
 
             var bulletPrefab = BuildBulletPrefab(sprite);
             var pool = CreateBulletPool(bulletPrefab);
-            var player = CreatePlayer(sprite, pool);
+            var player = CreatePlayer(sprite, pool, collectibleChannel);
             WireCameraFollow(cameraGo, player);
 
+            var levelExit = SpawnLevelExit(sandboxRoot, sprite);
+            CreateLevelController(sandboxRoot, player, levelExit);
+
             Selection.activeGameObject = player;
-            Debug.Log("[PlayerSandbox] Built scenery + enemy + player + bullet pool + camera follow. Play — A/D walk, Space jump, J / left-mouse shoot. Face left to hit the enemy, right to break crates.");
+            Debug.Log("[PlayerSandbox] Sandbox built. A/D walk, Space jump, J/mouse shoot. Left = enemy, right = crates → reach the blue exit at the far right. Die = respawn after a moment.");
         }
 
         private static void ClearPreviousSandbox()
@@ -63,7 +73,7 @@ namespace Game.Editor.Sandbox
             }
         }
 
-        private static GameObject CreatePlayer(Sprite sprite, BulletPool pool)
+        private static GameObject CreatePlayer(Sprite sprite, BulletPool pool, IntEventChannel collectibleChannel)
         {
             var go = new GameObject("Player");
             Undo.RegisterCreatedObjectUndo(go, "Create Player");
@@ -113,7 +123,60 @@ namespace Game.Editor.Sandbox
             deathSerialized.FindProperty("_renderer").objectReferenceValue = renderer;
             deathSerialized.ApplyModifiedProperties();
 
+            var collector = Undo.AddComponent<PlayerCollector>(go);
+            var collectorSerialized = new SerializedObject(collector);
+            collectorSerialized.FindProperty("_pickedChannel").objectReferenceValue = collectibleChannel;
+            collectorSerialized.ApplyModifiedProperties();
+
             return go;
+        }
+
+        private static void SpawnCollectibles(GameObject sandboxRoot, Sprite sprite, IntEventChannel channel)
+        {
+            var color = new Color(0.40f, 0.90f, 0.60f);
+            Vector3[] positions =
+            {
+                new(1.5f, -1.5f, 0f),
+                new(-3f, -1.5f, 0f),
+                new(-6f, -1.5f, 0f),
+                new(0f, 0.3f, 0f), // above the ground — needs a jump
+            };
+
+            foreach (var position in positions)
+            {
+                var go = new GameObject("Collectible");
+                go.transform.SetParent(sandboxRoot.transform);
+                go.transform.position = position;
+                go.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
+
+                var renderer = go.AddComponent<SpriteRenderer>();
+                renderer.sprite = sprite;
+                renderer.color = color;
+                renderer.sortingOrder = 6;
+
+                var collider = go.AddComponent<CircleCollider2D>();
+                collider.isTrigger = true;
+                collider.radius = 0.6f;
+
+                var collectible = go.AddComponent<Collectible>();
+                var serialized = new SerializedObject(collectible);
+                serialized.FindProperty("_value").intValue = 1;
+                serialized.FindProperty("_pickedChannel").objectReferenceValue = channel;
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+            }
+        }
+
+        private static IntEventChannel GetOrCreateCollectibleChannel()
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<IntEventChannel>(CollectibleChannelPath);
+            if (existing != null) return existing;
+
+            Directory.CreateDirectory(Path.GetDirectoryName(CollectibleChannelPath));
+
+            var channel = ScriptableObject.CreateInstance<IntEventChannel>();
+            AssetDatabase.CreateAsset(channel, CollectibleChannelPath);
+            AssetDatabase.SaveAssets();
+            return channel;
         }
 
         private static BulletPool CreateBulletPool(GameObject bulletPrefab)
@@ -214,6 +277,42 @@ namespace Game.Editor.Sandbox
         {
             var enemy = (GameObject)PrefabUtility.InstantiatePrefab(enemyPrefab, sandboxRoot.transform);
             enemy.transform.position = new Vector3(-8f, -1.75f, 0f);
+        }
+
+        private static LevelExit SpawnLevelExit(GameObject sandboxRoot, Sprite sprite)
+        {
+            var go = new GameObject("LevelExit");
+            go.transform.SetParent(sandboxRoot.transform);
+            go.transform.position = new Vector3(12f, -1f, 0f); // far right, past the crates
+            go.transform.localScale = new Vector3(1f, 3f, 1f);
+
+            var renderer = go.AddComponent<SpriteRenderer>();
+            renderer.sprite = sprite;
+            renderer.color = new Color(0.40f, 0.80f, 1f);
+            renderer.sortingOrder = 2;
+
+            var collider = go.AddComponent<BoxCollider2D>();
+            collider.isTrigger = true;
+
+            return go.AddComponent<LevelExit>();
+        }
+
+        private static void CreateLevelController(GameObject sandboxRoot, GameObject player, LevelExit exit)
+        {
+            var go = new GameObject("LevelController");
+            go.transform.SetParent(sandboxRoot.transform);
+
+            var controller = go.AddComponent<LevelController>();
+            var serialized = new SerializedObject(controller);
+            serialized.FindProperty("_player").objectReferenceValue = player;
+            serialized.FindProperty("_exit").objectReferenceValue = exit;
+
+            var control = serialized.FindProperty("_playerControl");
+            control.arraySize = 3;
+            control.GetArrayElementAtIndex(0).objectReferenceValue = player.GetComponent<InputReader>();
+            control.GetArrayElementAtIndex(1).objectReferenceValue = player.GetComponent<PlayerMotor>();
+            control.GetArrayElementAtIndex(2).objectReferenceValue = player.GetComponent<Shooter>();
+            serialized.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static EnemyDefinition GetOrCreateEnemyDefinition()

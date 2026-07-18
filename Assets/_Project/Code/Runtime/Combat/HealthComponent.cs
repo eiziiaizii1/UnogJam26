@@ -38,6 +38,12 @@ namespace Game.Runtime.Combat
             Build(maxHealth);
         }
 
+        /// <summary>Restores full HP (used on player respawn).</summary>
+        public void ResetToFull()
+        {
+            Build(_maxHealth);
+        }
+
         public void ApplyDamage(int amount)
         {
             _health.TakeDamage(amount);
