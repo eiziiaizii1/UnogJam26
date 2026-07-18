@@ -29,7 +29,11 @@ namespace Game.Runtime.Enemies
             var definition = _controller != null ? _controller.Definition : null;
             if (definition == null) return;
 
-            var frames = _controller.IsMoving ? definition.WalkFrames : definition.IdleFrames;
+            // Attack wins over walk wins over idle.
+            bool attacking = _controller.IsAttacking && definition.CanAttack;
+            var frames = attacking ? definition.AttackFrames
+                       : _controller.IsMoving ? definition.WalkFrames
+                       : definition.IdleFrames;
             if (frames == null || frames.Length == 0) return;
 
             // Restart cleanly when swapping clips so a short clip can't index past its end.
@@ -48,7 +52,18 @@ namespace Game.Runtime.Enemies
             while (_timer >= frameDuration)
             {
                 _timer -= frameDuration;
-                _frame = (_frame + 1) % frames.Length;
+
+                // The attack plays once and holds its last frame; the controller ends the state on
+                // a timer, so looping here would restart the swing and desync from the damage tick.
+                if (attacking)
+                {
+                    if (_frame < frames.Length - 1) _frame++;
+                }
+                else
+                {
+                    _frame = (_frame + 1) % frames.Length;
+                }
+
                 _renderer.sprite = frames[_frame];
             }
         }

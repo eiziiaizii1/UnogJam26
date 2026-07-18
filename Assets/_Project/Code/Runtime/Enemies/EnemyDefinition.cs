@@ -33,6 +33,17 @@ namespace Game.Runtime.Enemies
         [SerializeField] private float _hoverAmplitude = 0.5f;
         [SerializeField] private float _hoverFrequency = 1.5f;
 
+        [Header("Attack (leave frames empty for a purely contact-damage enemy)")]
+        [Tooltip("Played once when the player comes within range. Patrol pauses for its duration.")]
+        [SerializeField] private Sprite[] _attackFrames;
+        [Tooltip("Distance to the player that triggers an attack. Keep it a little over the contact reach.")]
+        [SerializeField] private float _attackRange = 1.6f;
+        [SerializeField] private int _attackDamage = 1;
+        [SerializeField] private float _attackCooldownSeconds = 1.5f;
+        [Range(0f, 1f)]
+        [Tooltip("How far through the animation the damage lands — 0.5 means on the middle frame.")]
+        [SerializeField] private float _attackHitFraction = 0.5f;
+
         public string DisplayName => _displayName;
         public int MaxHealth => _maxHealth;
         public float MoveSpeed => _moveSpeed;
@@ -51,6 +62,17 @@ namespace Game.Runtime.Enemies
         public float HoverAmplitude => _hoverAmplitude;
         public float HoverFrequency => _hoverFrequency;
 
+        public Sprite[] AttackFrames => _attackFrames;
+        public bool CanAttack => _attackFrames != null && _attackFrames.Length > 0;
+        public float AttackRange => _attackRange;
+        public int AttackDamage => _attackDamage;
+        public float AttackCooldownSeconds => _attackCooldownSeconds;
+        public float AttackHitFraction => _attackHitFraction;
+
+        /// <summary>How long one full swing takes — the animation defines the timing, not a magic number.</summary>
+        public float AttackDuration =>
+            !CanAttack || _framesPerSecond <= 0f ? 0f : _attackFrames.Length / _framesPerSecond;
+
         private void OnValidate()
         {
             _maxHealth = Mathf.Max(1, _maxHealth);
@@ -60,6 +82,9 @@ namespace Game.Runtime.Enemies
             _framesPerSecond = Mathf.Max(0f, _framesPerSecond);
             _hoverAmplitude = Mathf.Max(0f, _hoverAmplitude);
             _hoverFrequency = Mathf.Max(0f, _hoverFrequency);
+            _attackRange = Mathf.Max(0f, _attackRange);
+            _attackDamage = Mathf.Max(0, _attackDamage);
+            _attackCooldownSeconds = Mathf.Max(0f, _attackCooldownSeconds);
         }
 
         public bool Validate(out string error)
@@ -73,6 +98,7 @@ namespace Game.Runtime.Enemies
             // it renders as a one-frame blink mid-animation, which is maddening to track down at runtime.
             if (HasNullFrame(_idleFrames)) { error = $"{name}: IdleFrames contains an empty slot."; return false; }
             if (HasNullFrame(_walkFrames)) { error = $"{name}: WalkFrames contains an empty slot."; return false; }
+            if (HasNullFrame(_attackFrames)) { error = $"{name}: AttackFrames contains an empty slot."; return false; }
             if (_framesPerSecond <= 0f && _idleFrames != null && _idleFrames.Length > 1)
             { error = $"{name}: FramesPerSecond must be positive to animate."; return false; }
 

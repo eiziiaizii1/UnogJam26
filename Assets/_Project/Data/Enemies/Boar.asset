@@ -15,7 +15,7 @@ MonoBehaviour:
   _displayName: Boar
   _maxHealth: 3
   _moveSpeed: 3.5
-  _contactDamage: 1
+  _contactDamage: 0
   _patrolHalfWidth: 2
   _tintColor: {r: 1, g: 1, b: 1, a: 1}
   _size: {x: 2, y: 2}
@@ -33,3 +33,13 @@ MonoBehaviour:
   _flying: 0
   _hoverAmplitude: 0
   _hoverFrequency: 0
+  _attackFrames:
+  - {fileID: 6537579238732839967, guid: c0ca9797c975dc84683b89cee9a895f2, type: 3}
+  - {fileID: -5944359786020868542, guid: c0ca9797c975dc84683b89cee9a895f2, type: 3}
+  - {fileID: -3610267396622823303, guid: c0ca9797c975dc84683b89cee9a895f2, type: 3}
+  - {fileID: -5400500386182608394, guid: c0ca9797c975dc84683b89cee9a895f2, type: 3}
+  - {fileID: -8044176204105586288, guid: c0ca9797c975dc84683b89cee9a895f2, type: 3}
+  _attackRange: 1.5
+  _attackDamage: 1
+  _attackCooldownSeconds: 1.2
+  _attackHitFraction: 0.5

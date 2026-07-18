@@ -15,7 +15,7 @@ MonoBehaviour:
   _displayName: Bear
   _maxHealth: 6
   _moveSpeed: 1.2
-  _contactDamage: 2
+  _contactDamage: 0
   _patrolHalfWidth: 1
   _tintColor: {r: 1, g: 1, b: 1, a: 1}
   _size: {x: 2, y: 2}
@@ -35,3 +35,14 @@ MonoBehaviour:
   _flying: 0
   _hoverAmplitude: 0
   _hoverFrequency: 0
+  _attackFrames:
+  - {fileID: -584858750305194922, guid: 6b53de64c7caeac45bc66e09835693ca, type: 3}
+  - {fileID: -4571960576383398362, guid: 6b53de64c7caeac45bc66e09835693ca, type: 3}
+  - {fileID: -8790200143403477518, guid: 6b53de64c7caeac45bc66e09835693ca, type: 3}
+  - {fileID: 1953136796782178926, guid: 6b53de64c7caeac45bc66e09835693ca, type: 3}
+  - {fileID: 1588161173331588922, guid: 6b53de64c7caeac45bc66e09835693ca, type: 3}
+  - {fileID: 8577510574224684060, guid: 6b53de64c7caeac45bc66e09835693ca, type: 3}
+  _attackRange: 1.7
+  _attackDamage: 2
+  _attackCooldownSeconds: 1.6
+  _attackHitFraction: 0.5

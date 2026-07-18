@@ -1,3 +1,4 @@
+using Game.Core.Combat;
 using Game.Runtime.Combat;
 using UnityEngine;
 
@@ -25,6 +26,11 @@ namespace Game.Runtime.Enemies
         private float _originY;
         private int _direction = 1;
 
+        private Transform _player;
+        private float _attackEndTime;
+        private float _nextAttackTime;
+        private bool _attackLanded;
+
         /// <summary>The archetype this enemy is running, for views (e.g. the sprite animator) to read.</summary>
         public EnemyDefinition Definition => _definition;
 
@@ -33,6 +39,9 @@ namespace Game.Runtime.Enemies
 
         /// <summary>Facing: +1 right, -1 left.</summary>
         public int Facing => _direction;
+
+        /// <summary>True while a swing is playing, so the animator can show the attack clip.</summary>
+        public bool IsAttacking { get; private set; }
 
         /// <summary>Sets the archetype before Awake (used by a spawner/factory).</summary>
         public void Configure(EnemyDefinition definition) => _definition = definition;
@@ -67,6 +76,8 @@ namespace Game.Runtime.Enemies
         {
             if (_definition == null) return;
 
+            if (TickAttack()) return; // Attacking overrides patrol — a swinging bear shouldn't drift.
+
             float half = _definition.PatrolHalfWidth;
             float speed = _definition.MoveSpeed;
             if (half <= 0f || speed <= 0f)
@@ -94,6 +105,84 @@ namespace Game.Runtime.Enemies
             float nextY = _definition.Flying ? HoverY() : position.y;
             IsMoving = true;
             _body.MovePosition(new Vector2(nextX, nextY));
+        }
+
+        /// <summary>
+        /// Runs the attack state machine. Returns true while a swing owns the frame, so the caller
+        /// skips patrolling. Damage lands partway through the clip rather than on the first frame,
+        /// so the player sees the wind-up and has a chance to back off.
+        /// </summary>
+        private bool TickAttack()
+        {
+            if (!_definition.CanAttack) return false;
+
+            if (IsAttacking)
+            {
+                float hitTime = _attackEndTime - _definition.AttackDuration * (1f - _definition.AttackHitFraction);
+                if (!_attackLanded && Time.time >= hitTime)
+                {
+                    _attackLanded = true;
+                    // Re-check range on the hit frame: stepping out of reach should dodge the blow.
+                    if (PlayerInRange()) DamagePlayer();
+                }
+
+                if (Time.time >= _attackEndTime)
+                {
+                    IsAttacking = false;
+                    _nextAttackTime = Time.time + _definition.AttackCooldownSeconds;
+                }
+
+                // A flyer still hovers mid-swing, otherwise it snaps to a dead stop in the air.
+                if (_definition.Flying) _body.MovePosition(new Vector2(_body.position.x, HoverY()));
+                IsMoving = false;
+                return true;
+            }
+
+            if (Time.time < _nextAttackTime || !PlayerInRange()) return false;
+
+            IsAttacking = true;
+            _attackLanded = false;
+            _attackEndTime = Time.time + _definition.AttackDuration;
+            FacePlayer();
+            IsMoving = false;
+            return true;
+        }
+
+        private bool PlayerInRange()
+        {
+            var player = ResolvePlayer();
+            if (player == null) return false;
+            float range = _definition.AttackRange;
+            return ((Vector2)player.position - _body.position).sqrMagnitude <= range * range;
+        }
+
+        private void DamagePlayer()
+        {
+            var player = ResolvePlayer();
+            if (player == null) return;
+            if (player.TryGetComponent<IDamageable>(out var damageable) && damageable.IsAlive)
+            {
+                damageable.ApplyDamage(_definition.AttackDamage);
+            }
+        }
+
+        /// <summary>
+        /// Finds the player by component rather than by tag — the Player object is untagged in this
+        /// project, so a FindWithTag lookup would silently return null forever.
+        /// </summary>
+        private Transform ResolvePlayer()
+        {
+            if (_player != null) return _player;
+            var motor = FindAnyObjectByType<Game.Runtime.Player.PlayerMotor>();
+            _player = motor != null ? motor.transform : null;
+            return _player;
+        }
+
+        private void FacePlayer()
+        {
+            var player = ResolvePlayer();
+            if (player == null) return;
+            SetDirection(player.position.x >= _body.position.x ? 1 : -1);
         }
 
         /// <summary>Sine bob around the spawn height. Flyers only — walkers keep whatever Y physics gave them.</summary>
