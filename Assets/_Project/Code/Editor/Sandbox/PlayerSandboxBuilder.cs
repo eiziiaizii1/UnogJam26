@@ -76,9 +76,16 @@ namespace Game.Editor.Sandbox
             go.transform.position = Vector3.zero;
             go.transform.localScale = new Vector3(1f, 1.5f, 1f);
 
-            var renderer = Undo.AddComponent<SpriteRenderer>(go);
+            var visualsGo = new GameObject("Visuals");
+            visualsGo.transform.SetParent(go.transform);
+            visualsGo.transform.localPosition = Vector3.zero;
+            visualsGo.transform.localRotation = Quaternion.identity;
+            visualsGo.transform.localScale = new Vector3(3f, 3f, 3f);
+            Undo.RegisterCreatedObjectUndo(visualsGo, "Create Player Visuals");
+
+            var renderer = Undo.AddComponent<SpriteRenderer>(visualsGo);
             renderer.sprite = sprite;
-            renderer.color = RobotColor;
+            renderer.color = Color.white;
             renderer.sortingOrder = 10;
 
             var body = Undo.AddComponent<Rigidbody2D>(go);
@@ -123,6 +130,46 @@ namespace Game.Editor.Sandbox
             var collectorSerialized = new SerializedObject(collector);
             collectorSerialized.FindProperty("_pickedChannel").objectReferenceValue = collectibleChannel;
             collectorSerialized.ApplyModifiedProperties();
+
+            // Wire player sprite animator
+            var animator = Undo.AddComponent<PlayerSpriteAnimator>(go);
+            var animatorSerialized = new SerializedObject(animator);
+            animatorSerialized.FindProperty("_input").objectReferenceValue = input;
+            animatorSerialized.FindProperty("_renderer").objectReferenceValue = renderer;
+            
+            // Load sprites
+            var idleRight = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot sağ.png");
+            var idleLeft = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot sol.png");
+            animatorSerialized.FindProperty("_idleRight").objectReferenceValue = idleRight;
+            animatorSerialized.FindProperty("_idleLeft").objectReferenceValue = idleLeft;
+
+            // Walk right
+            var walkRightProp = animatorSerialized.FindProperty("_walkRight");
+            walkRightProp.arraySize = 2;
+            walkRightProp.GetArrayElementAtIndex(0).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot yürüme sağ1.png");
+            walkRightProp.GetArrayElementAtIndex(1).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot yürüme sağ2.png");
+
+            // Walk left
+            var walkLeftProp = animatorSerialized.FindProperty("_walkLeft");
+            walkLeftProp.arraySize = 2;
+            walkLeftProp.GetArrayElementAtIndex(0).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot yürüme sol1.png");
+            walkLeftProp.GetArrayElementAtIndex(1).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot yürüme sol2.png");
+
+            // Jump right
+            var jumpRightProp = animatorSerialized.FindProperty("_jumpRight");
+            jumpRightProp.arraySize = 3;
+            jumpRightProp.GetArrayElementAtIndex(0).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot sağ zıplama1.png");
+            jumpRightProp.GetArrayElementAtIndex(1).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot sağ zıplama2.png");
+            jumpRightProp.GetArrayElementAtIndex(2).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot sağ zıplama3.png");
+
+            // Jump left
+            var jumpLeftProp = animatorSerialized.FindProperty("_jumpLeft");
+            jumpLeftProp.arraySize = 3;
+            jumpLeftProp.GetArrayElementAtIndex(0).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot sol zıplama1.png");
+            jumpLeftProp.GetArrayElementAtIndex(1).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot sol zıplama2.png");
+            jumpLeftProp.GetArrayElementAtIndex(2).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot sol zıplama3.png");
+
+            animatorSerialized.ApplyModifiedProperties();
 
             return go;
         }
@@ -433,6 +480,113 @@ namespace Game.Editor.Sandbox
             importer.SaveAndReimport();
 
             return AssetDatabase.LoadAssetAtPath<Sprite>(SquareSpritePath);
+        }
+
+        [MenuItem("Tools/IloveNature/Setup Player Animator on Prefab")]
+        public static void SetupPlayerAnimatorOnPrefab()
+        {
+            var prefabPath = "Assets/_Project/Content/prefabs/Player.prefab";
+            var playerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            if (playerPrefab == null)
+            {
+                Debug.LogError($"[PlayerAnimatorSetup] Player prefab not found at {prefabPath}");
+                return;
+            }
+
+            var rootPath = PrefabUtility.LoadPrefabContents(prefabPath);
+
+            // 1. Setup Visuals Child Object
+            var visualsTransform = rootPath.transform.Find("Visuals");
+            GameObject visualsGo;
+            SpriteRenderer renderer;
+            if (visualsTransform == null)
+            {
+                visualsGo = new GameObject("Visuals");
+                visualsGo.transform.SetParent(rootPath.transform);
+                visualsGo.transform.localPosition = Vector3.zero;
+                visualsGo.transform.localRotation = Quaternion.identity;
+                visualsGo.transform.localScale = new Vector3(3f, 3f, 3f);
+                
+                var oldRenderer = rootPath.GetComponent<SpriteRenderer>();
+                renderer = visualsGo.AddComponent<SpriteRenderer>();
+                if (oldRenderer != null)
+                {
+                    renderer.sprite = oldRenderer.sprite;
+                    renderer.color = Color.white;
+                    renderer.sortingOrder = oldRenderer.sortingOrder;
+                    Object.DestroyImmediate(oldRenderer, true);
+                }
+                else
+                {
+                    renderer.color = Color.white;
+                }
+            }
+            else
+            {
+                visualsGo = visualsTransform.gameObject;
+                renderer = visualsGo.GetComponent<SpriteRenderer>();
+                if (renderer == null)
+                {
+                    renderer = visualsGo.AddComponent<SpriteRenderer>();
+                }
+            }
+
+            // 2. Setup Components & Wire references
+            var animator = rootPath.GetComponent<PlayerSpriteAnimator>();
+            if (animator == null)
+            {
+                animator = rootPath.AddComponent<PlayerSpriteAnimator>();
+            }
+
+            var input = rootPath.GetComponent<InputReader>();
+            var motor = rootPath.GetComponent<PlayerMotor>();
+            var death = rootPath.GetComponent<PlayerDeath>();
+
+            // motor doesn't have _spriteParent on this branch
+
+            if (death != null)
+            {
+                var deathSerialized = new SerializedObject(death);
+                deathSerialized.FindProperty("_renderer").objectReferenceValue = renderer;
+                deathSerialized.ApplyModifiedProperties();
+            }
+
+            var animatorSerialized = new SerializedObject(animator);
+            animatorSerialized.FindProperty("_input").objectReferenceValue = input;
+            animatorSerialized.FindProperty("_renderer").objectReferenceValue = renderer;
+            
+            // Load sprites
+            animatorSerialized.FindProperty("_idleRight").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot sağ.png");
+            animatorSerialized.FindProperty("_idleLeft").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot sol.png");
+
+            var walkRightProp = animatorSerialized.FindProperty("_walkRight");
+            walkRightProp.arraySize = 2;
+            walkRightProp.GetArrayElementAtIndex(0).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot yürüme sağ1.png");
+            walkRightProp.GetArrayElementAtIndex(1).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot yürüme sağ2.png");
+
+            var walkLeftProp = animatorSerialized.FindProperty("_walkLeft");
+            walkLeftProp.arraySize = 2;
+            walkLeftProp.GetArrayElementAtIndex(0).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot yürüme sol1.png");
+            walkLeftProp.GetArrayElementAtIndex(1).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot yürüme sol2.png");
+
+            var jumpRightProp = animatorSerialized.FindProperty("_jumpRight");
+            jumpRightProp.arraySize = 3;
+            jumpRightProp.GetArrayElementAtIndex(0).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot sağ zıplama1.png");
+            jumpRightProp.GetArrayElementAtIndex(1).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot sağ zıplama2.png");
+            jumpRightProp.GetArrayElementAtIndex(2).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot sağ zıplama3.png");
+
+            var jumpLeftProp = animatorSerialized.FindProperty("_jumpLeft");
+            jumpLeftProp.arraySize = 3;
+            jumpLeftProp.GetArrayElementAtIndex(0).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot sol zıplama1.png");
+            jumpLeftProp.GetArrayElementAtIndex(1).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot sol zıplama2.png");
+            jumpLeftProp.GetArrayElementAtIndex(2).objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Images/robot 1/robot sol zıplama3.png");
+
+            animatorSerialized.ApplyModifiedProperties();
+            
+            PrefabUtility.SaveAsPrefabAsset(rootPath, prefabPath);
+            PrefabUtility.UnloadPrefabContents(rootPath);
+            
+            Debug.Log($"[PlayerAnimatorSetup] Successfully migrated SpriteRenderer to 'Visuals' child and wired PlayerSpriteAnimator on prefab {prefabPath}");
         }
     }
 }
