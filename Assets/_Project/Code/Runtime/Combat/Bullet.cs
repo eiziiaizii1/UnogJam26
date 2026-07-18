@@ -15,6 +15,12 @@ namespace Game.Runtime.Combat
         [SerializeField] private float _lifetimeSeconds = 2f;
         [SerializeField] private int _damage = 1;
 
+        [Header("Gamefeel & VFX")]
+        [Tooltip("Mermi duvara veya düşmana çarptığında çıkacak kıvılcım/patlama efekti prefab'ı")]
+        [SerializeField] private GameObject _hitVfxPrefab;
+        [Tooltip("Düşmana hasar verildiğinde uygulanacak Hit Stop (Donma) süresi")]
+        [SerializeField] private float _hitStopDuration = 0.05f;
+
         private Rigidbody2D _body;
         private IObjectPool<Bullet> _pool;
         private GameObject _owner;
@@ -55,9 +61,26 @@ namespace Game.Runtime.Combat
         {
             if (other.gameObject == _owner) return;
 
+            bool hitDamageable = false;
+
             if (other.TryGetComponent<IDamageable>(out var damageable) && damageable.IsAlive)
             {
                 damageable.ApplyDamage(_damage);
+                hitDamageable = true;
+            }
+
+            // Çarpma efekti (Hit VFX)
+            if (_hitVfxPrefab != null)
+            {
+                var vfx = Instantiate(_hitVfxPrefab, transform.position, Quaternion.identity);
+                Destroy(vfx, 1.5f);
+            }
+
+            // Vuruş donması (Hit Stop)
+            if (hitDamageable && _hitStopDuration > 0f && Time.timeScale > 0.01f)
+            {
+                Time.timeScale = 0f;
+                PrimeTween.Tween.Delay(_hitStopDuration, () => Time.timeScale = 1f, useUnscaledTime: true);
             }
 
             Despawn();

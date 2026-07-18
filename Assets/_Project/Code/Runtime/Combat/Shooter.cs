@@ -31,6 +31,16 @@ namespace Game.Runtime.Combat
         [SerializeField] private GameObject _muzzleFlashLight;
         [SerializeField] private float _flashDuration = 0.05f; // Işığın aktif kalma süresi
 
+        [Header("Shell Ejection")]
+        [Tooltip("Ateş edildiğinde fırlatılacak kovan prefab'ı")]
+        [SerializeField] private GameObject _shellPrefab;
+        [Tooltip("Kovanın fırlatılacağı çıkış noktası (Boş bırakılırsa muzzle offset kullanılır)")]
+        [SerializeField] private Transform _shellEjectionPoint;
+        [Tooltip("Kovanın fırlama kuvveti (X=Geriye, Y=Yukarıya)")]
+        [SerializeField] private Vector2 _shellEjectForce = new Vector2(-2.5f, 3.5f);
+        [Tooltip("Kovanın dönme tork miktarı")]
+        [SerializeField] private float _shellTorque = 150f;
+
         private Rigidbody2D _rigidbody;
         private float _nextFireTime;
         private float _facing = 1f;
@@ -97,6 +107,24 @@ namespace Game.Runtime.Combat
                     StopCoroutine(_flashCoroutine);
                 }
                 _flashCoroutine = StartCoroutine(FlashLightRoutine());
+            }
+
+            // Mermi Kovanı Fırlatma (Shell Ejection)
+            if (_shellPrefab != null)
+            {
+                Vector3 spawnPos = _shellEjectionPoint != null ? _shellEjectionPoint.position : (Vector3)muzzle;
+                GameObject shell = Instantiate(_shellPrefab, spawnPos, Quaternion.identity);
+                
+                if (shell.TryGetComponent<Rigidbody2D>(out var shellRb))
+                {
+                    // Oyuncunun baktığı yönün tersine fırlat
+                    float forceX = -_facing * Mathf.Abs(_shellEjectForce.x) + Random.Range(-0.5f, 0.5f);
+                    float forceY = _shellEjectForce.y + Random.Range(-0.5f, 0.5f);
+                    shellRb.AddForce(new Vector2(forceX, forceY), ForceMode2D.Impulse);
+                    shellRb.AddTorque(Random.Range(-_shellTorque, _shellTorque));
+                }
+                
+                Destroy(shell, 1.0f); // 3 saniye sonra kovanı temizle
             }
         }
 
