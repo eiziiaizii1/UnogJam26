@@ -37,6 +37,8 @@ namespace Game.Runtime.UI
         [SerializeField] private Ease _animationEase = Ease.OutQuad;
 
         [Header("Mock Test Options")]
+        [Tooltip("Debug only: press K to damage the bar directly. Off by default — real damage drives it via HealthBarPresenter.")]
+        [SerializeField] private bool _enableMockDamageKey;
         [SerializeField] private float _damageAmount = 15f;
 
         private Tween _mainTween;
@@ -44,8 +46,20 @@ namespace Game.Runtime.UI
         private Tween _punchTween;
         private float _previousHealth;
 
-        private void Start()
+        // Awake (not Start) so a presenter can override with real values in Start without a race.
+        private void Awake()
         {
+            Initialize(_currentHealth, _maxHealth);
+        }
+
+        /// <summary>
+        /// Snaps the bar to a health range with no animation. Call this once from a presenter so
+        /// the bar matches the real <c>HealthComponent</c> (e.g. 5 HP, not the mock 100).
+        /// </summary>
+        public void Initialize(float currentHealth, float maxHealth)
+        {
+            _maxHealth = Mathf.Max(1f, maxHealth);
+            _currentHealth = Mathf.Clamp(currentHealth, 0f, _maxHealth);
             _previousHealth = _currentHealth;
 
             if (_mainSlider != null)
@@ -67,6 +81,8 @@ namespace Game.Runtime.UI
 
         private void Update()
         {
+            if (!_enableMockDamageKey) return;
+
             if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.K))
             {
                 TakeDamage(_damageAmount);
