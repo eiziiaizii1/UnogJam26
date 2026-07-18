@@ -20,6 +20,19 @@ namespace Game.Runtime.Enemies
         [SerializeField] private Color _tintColor = Color.white;
         [SerializeField] private Vector2 _size = Vector2.one;
 
+        [Header("Animation (leave empty for a static sprite)")]
+        [Tooltip("Played while standing still. Frames come straight off the sliced sheet.")]
+        [SerializeField] private Sprite[] _idleFrames;
+        [Tooltip("Played while patrolling. Falls back to the idle frames when empty.")]
+        [SerializeField] private Sprite[] _walkFrames;
+        [SerializeField] private float _framesPerSecond = 8f;
+
+        [Header("Movement")]
+        [Tooltip("Flyers ignore the ground and bob around their spawn height instead of walking on it.")]
+        [SerializeField] private bool _flying;
+        [SerializeField] private float _hoverAmplitude = 0.5f;
+        [SerializeField] private float _hoverFrequency = 1.5f;
+
         public string DisplayName => _displayName;
         public int MaxHealth => _maxHealth;
         public float MoveSpeed => _moveSpeed;
@@ -28,12 +41,25 @@ namespace Game.Runtime.Enemies
         public Color TintColor => _tintColor;
         public Vector2 Size => _size;
 
+        public Sprite[] IdleFrames => _idleFrames;
+
+        /// <summary>Walk frames, or the idle frames when a sheet has no separate walk row.</summary>
+        public Sprite[] WalkFrames => _walkFrames != null && _walkFrames.Length > 0 ? _walkFrames : _idleFrames;
+
+        public float FramesPerSecond => _framesPerSecond;
+        public bool Flying => _flying;
+        public float HoverAmplitude => _hoverAmplitude;
+        public float HoverFrequency => _hoverFrequency;
+
         private void OnValidate()
         {
             _maxHealth = Mathf.Max(1, _maxHealth);
             _moveSpeed = Mathf.Max(0f, _moveSpeed);
             _contactDamage = Mathf.Max(0, _contactDamage);
             _patrolHalfWidth = Mathf.Max(0f, _patrolHalfWidth);
+            _framesPerSecond = Mathf.Max(0f, _framesPerSecond);
+            _hoverAmplitude = Mathf.Max(0f, _hoverAmplitude);
+            _hoverFrequency = Mathf.Max(0f, _hoverFrequency);
         }
 
         public bool Validate(out string error)
@@ -42,8 +68,23 @@ namespace Game.Runtime.Enemies
             if (_moveSpeed < 0f) { error = $"{name}: MoveSpeed must be non-negative."; return false; }
             if (_contactDamage < 0) { error = $"{name}: ContactDamage must be non-negative."; return false; }
             if (_patrolHalfWidth < 0f) { error = $"{name}: PatrolHalfWidth must be non-negative."; return false; }
+
+            // A null slot in a frame array is the classic "dragged the sheet, missed a cell" mistake:
+            // it renders as a one-frame blink mid-animation, which is maddening to track down at runtime.
+            if (HasNullFrame(_idleFrames)) { error = $"{name}: IdleFrames contains an empty slot."; return false; }
+            if (HasNullFrame(_walkFrames)) { error = $"{name}: WalkFrames contains an empty slot."; return false; }
+            if (_framesPerSecond <= 0f && _idleFrames != null && _idleFrames.Length > 1)
+            { error = $"{name}: FramesPerSecond must be positive to animate."; return false; }
+
             error = null;
             return true;
+        }
+
+        private static bool HasNullFrame(Sprite[] frames)
+        {
+            if (frames == null) return false;
+            foreach (var frame in frames) if (frame == null) return true;
+            return false;
         }
     }
 }

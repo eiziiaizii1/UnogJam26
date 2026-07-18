@@ -14,12 +14,25 @@ namespace Game.Runtime.Enemies
     public sealed class EnemyController : MonoBehaviour
     {
         [SerializeField] private EnemyDefinition _definition;
+        [Tooltip("Child that carries the sprite. Sized and flipped instead of the root, so the collider " +
+                 "keeps its authored shape. Falls back to this object for the old square-sprite prefab.")]
+        [SerializeField] private Transform _visuals;
 
         private Rigidbody2D _body;
         private HealthComponent _health;
         private SpriteRenderer _renderer;
         private float _originX;
+        private float _originY;
         private int _direction = 1;
+
+        /// <summary>The archetype this enemy is running, for views (e.g. the sprite animator) to read.</summary>
+        public EnemyDefinition Definition => _definition;
+
+        /// <summary>True while the patrol is actually moving it, so the animator can pick walk vs idle.</summary>
+        public bool IsMoving { get; private set; }
+
+        /// <summary>Facing: +1 right, -1 left.</summary>
+        public int Facing => _direction;
 
         /// <summary>Sets the archetype before Awake (used by a spawner/factory).</summary>
         public void Configure(EnemyDefinition definition) => _definition = definition;
@@ -28,8 +41,11 @@ namespace Game.Runtime.Enemies
         {
             _body = GetComponent<Rigidbody2D>();
             _health = GetComponent<HealthComponent>();
-            _renderer = GetComponent<SpriteRenderer>();
+            if (_visuals == null) _visuals = transform;
+            _renderer = _visuals.GetComponent<SpriteRenderer>();
+            if (_renderer == null) _renderer = GetComponentInChildren<SpriteRenderer>();
             _originX = transform.position.x;
+            _originY = transform.position.y;
             ApplyDefinition();
         }
 
@@ -39,7 +55,7 @@ namespace Game.Runtime.Enemies
 
             _health.SetMaxHealth(_definition.MaxHealth);
             if (_renderer != null) _renderer.color = _definition.TintColor;
-            transform.localScale = new Vector3(_definition.Size.x, _definition.Size.y, 1f);
+            _visuals.localScale = new Vector3(_definition.Size.x, _definition.Size.y, 1f);
 
             if (TryGetComponent<ContactDamage>(out var contactDamage))
             {
@@ -53,7 +69,13 @@ namespace Game.Runtime.Enemies
 
             float half = _definition.PatrolHalfWidth;
             float speed = _definition.MoveSpeed;
-            if (half <= 0f || speed <= 0f) return;
+            if (half <= 0f || speed <= 0f)
+            {
+                IsMoving = false;
+                // A stationary flyer should still bob, otherwise it reads as a floating statue.
+                if (_definition.Flying) _body.MovePosition(new Vector2(_body.position.x, HoverY()));
+                return;
+            }
 
             Vector2 position = _body.position;
             float nextX = position.x + _direction * speed * Time.fixedDeltaTime;
@@ -69,15 +91,23 @@ namespace Game.Runtime.Enemies
                 SetDirection(1);
             }
 
-            _body.MovePosition(new Vector2(nextX, position.y));
+            float nextY = _definition.Flying ? HoverY() : position.y;
+            IsMoving = true;
+            _body.MovePosition(new Vector2(nextX, nextY));
+        }
+
+        /// <summary>Sine bob around the spawn height. Flyers only — walkers keep whatever Y physics gave them.</summary>
+        private float HoverY()
+        {
+            return _originY + Mathf.Sin(Time.time * _definition.HoverFrequency * Mathf.PI * 2f) * _definition.HoverAmplitude;
         }
 
         private void SetDirection(int direction)
         {
             _direction = direction;
-            Vector3 scale = transform.localScale;
+            Vector3 scale = _visuals.localScale;
             scale.x = Mathf.Abs(scale.x) * direction;
-            transform.localScale = scale;
+            _visuals.localScale = scale;
         }
     }
 }

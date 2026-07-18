@@ -12,27 +12,40 @@ namespace Game.Runtime.Combat
     public sealed class DamageFlash : MonoBehaviour
     {
         [SerializeField] private SpriteRenderer _renderer;
-        [SerializeField] private Color _flashColor = Color.white;
+        [Tooltip("Tint multiplied over the sprite. Must NOT be white — SpriteRenderer.color multiplies, " +
+                 "so white leaves white-tinted art untouched and the flash is invisible.")]
+        [SerializeField] private Color _flashColor = new(1f, 0.35f, 0.35f, 1f);
         [SerializeField] private float _flashSeconds = 0.08f;
 
         private HealthComponent _health;
         private Color _baseColor;
         private Coroutine _routine;
+        private int _lastKnownHealth;
 
         private void Awake()
         {
             _health = GetComponent<HealthComponent>();
-            if (_renderer == null) _renderer = GetComponent<SpriteRenderer>();
+            // Search children too: the sprite usually lives on a "Visuals" child, and a same-object-only
+            // lookup silently leaves this null — the flash then does nothing, with no error to notice.
+            if (_renderer == null) _renderer = GetComponentInChildren<SpriteRenderer>();
             if (_renderer != null) _baseColor = _renderer.color;
         }
 
-        private void OnEnable() => _health.Changed += OnHealthChanged;
+        private void OnEnable()
+        {
+            _health.Changed += OnHealthChanged;
+            _lastKnownHealth = _health.Current;
+        }
 
         private void OnDisable() => _health.Changed -= OnHealthChanged;
 
         private void OnHealthChanged(int current, int max)
         {
-            if (_renderer == null) return;
+            // Only damage flashes. Heals, respawn resets and max-HP upgrades all raise Changed too.
+            bool tookDamage = current < _lastKnownHealth;
+            _lastKnownHealth = current;
+
+            if (!tookDamage || _renderer == null) return;
             if (_routine != null) StopCoroutine(_routine);
             _routine = StartCoroutine(Flash());
         }

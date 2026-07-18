@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2253be479dfae7449e602e7a9b63899, type: 3}
+  m_Name: Bird
+  m_EditorClassIdentifier: 
+  _displayName: Bird
+  _maxHealth: 2
+  _moveSpeed: 2.5
+  _contactDamage: 1
+  _patrolHalfWidth: 2
+  _tintColor: {r: 1, g: 1, b: 1, a: 1}
+  _size: {x: 0.9, y: 0.9}
+  _idleFrames:
+  - {fileID: 568908241632775546, guid: 07f2e4a0821346d4e87b818f7eaf22c4, type: 3}
+  - {fileID: -8171438021535068612, guid: 07f2e4a0821346d4e87b818f7eaf22c4, type: 3}
+  - {fileID: -481652276549817633, guid: 07f2e4a0821346d4e87b818f7eaf22c4, type: 3}
+  - {fileID: 8737854685591822293, guid: 07f2e4a0821346d4e87b818f7eaf22c4, type: 3}
+  - {fileID: -3877272663140019349, guid: 07f2e4a0821346d4e87b818f7eaf22c4, type: 3}
+  - {fileID: -5176189855740236025, guid: 07f2e4a0821346d4e87b818f7eaf22c4, type: 3}
+  - {fileID: 6753407994076812986, guid: 07f2e4a0821346d4e87b818f7eaf22c4, type: 3}
+  - {fileID: 3311967709108843739, guid: 07f2e4a0821346d4e87b818f7eaf22c4, type: 3}
+  _walkFrames:
+  - {fileID: 568908241632775546, guid: 07f2e4a0821346d4e87b818f7eaf22c4, type: 3}
+  - {fileID: -8171438021535068612, guid: 07f2e4a0821346d4e87b818f7eaf22c4, type: 3}
+  - {fileID: -481652276549817633, guid: 07f2e4a0821346d4e87b818f7eaf22c4, type: 3}
+  - {fileID: 8737854685591822293, guid: 07f2e4a0821346d4e87b818f7eaf22c4, type: 3}
+  - {fileID: -3877272663140019349, guid: 07f2e4a0821346d4e87b818f7eaf22c4, type: 3}
+  - {fileID: -5176189855740236025, guid: 07f2e4a0821346d4e87b818f7eaf22c4, type: 3}
+  - {fileID: 6753407994076812986, guid: 07f2e4a0821346d4e87b818f7eaf22c4, type: 3}
+  - {fileID: 3311967709108843739, guid: 07f2e4a0821346d4e87b818f7eaf22c4, type: 3}
+  _framesPerSecond: 12
+  _flying: 1
+  _hoverAmplitude: 0.6
+  _hoverFrequency: 0.5
