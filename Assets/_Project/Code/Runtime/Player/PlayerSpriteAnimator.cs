@@ -16,8 +16,11 @@ namespace Game.Runtime.Player
         [SerializeField] private SpriteRenderer _renderer;
         
         [Header("Idle Sprites")]
-        [SerializeField] private Sprite _idleRight;
-        [SerializeField] private Sprite _idleLeft;
+        [Tooltip("Looping idle. The current art is front-facing, so both directions can share it.")]
+        [SerializeField] private Sprite[] _idleRight;
+        [SerializeField] private Sprite[] _idleLeft;
+        [Tooltip("Slower than the walk cycle — idle is a breath, not a step.")]
+        [SerializeField] private float _idleFrameDuration = 0.45f;
 
         [Header("Walk Sprites")]
         [SerializeField] private Sprite[] _walkRight;
@@ -107,9 +110,7 @@ namespace Game.Runtime.Player
                 else
                 {
                     // Idle
-                    _renderer.sprite = _facingRight ? _idleRight : _idleLeft;
-                    _currentFrame = 0;
-                    _animationTimer = 0f;
+                    PlayLoopAnimation(_facingRight ? _idleRight : _idleLeft, _idleFrameDuration);
                 }
             }
             else

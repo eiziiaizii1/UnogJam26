@@ -1,16 +1,10 @@
 fileFormatVersion: 2
-guid: 49d03b4b9407ccc4b987c23681cfa3d3
+guid: 277d1250fa355c24288a314012b0a2ff
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5451449731201704221
-    second: robot idle animasyon_0
-  - first:
-      213: 1604473826296236796
-    second: robot idle animasyon_1
-  - first:
-      213: 3745487480291991774
-    second: robot idle animasyon_2
+      213: 9139025951075695229
+    second: screenshot-20260719-004934_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -43,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -54,10 +48,10 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 0
+  spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 32
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -81,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -119,45 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: robot idle_0
+      name: screenshot-20260719-004934_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 32
-        height: 32
+        width: 1920
+        height: 1080
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 39bdd93947764ed45a894b6acf11e5b5
-      internalID: -2050048922
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: robot idle_1
-      rect:
-        serializedVersion: 2
-        x: 32
-        y: 0
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 386fe498929c916489789ed7956ee556
-      internalID: -950741233
+      spriteID: d7a71fe8ea754de70800000000000000
+      internalID: 9139025951075695229
       vertices: []
       indices: 
       edges: []
@@ -166,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 348005e8c1ee27740a1d6295936099d8
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -176,8 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      robot idle_0: -2050048922
-      robot idle_1: -950741233
+      screenshot-20260719-004934_0: 9139025951075695229
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
