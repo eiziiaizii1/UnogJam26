@@ -1,6 +1,5 @@
 using Game.Runtime.Input;
 using UnityEngine;
-using PrimeTween;
 
 namespace Game.Runtime.Player
 {
@@ -15,8 +14,6 @@ namespace Game.Runtime.Player
     {
         [Header("References")]
         [SerializeField] private InputReader _input;
-        [Tooltip("Esneme/Yaylanma animasyonunun uygulanacağı görsel nesne. Eğer idle animasyonu scale değerini kilitliyorsa (Animator yüzünden), Animator bulunmayan boş bir üst container nesnesini buraya atayın.")]
-        [SerializeField] private Transform _spriteParent;
 
         [Header("Walk")]
         [SerializeField] private float _walkSpeedUnitsPerSecond = 6f;
@@ -34,22 +31,9 @@ namespace Game.Runtime.Player
         [Tooltip("A contact counts as ground when its normal.y is at least this (1 = flat floor).")]
         [SerializeField] private float _minGroundNormalY = 0.5f;
 
-        [Header("Gamefeel & Squish/Stretch Settings")]
-        [Tooltip("Zıplama anındaki ölçek çarpanı (X = Daralma, Y = Uzama). Robot karakterler için hafif tutulması önerilir (örneğin X=0.96, Y=1.05).")]
-        [SerializeField] private Vector2 _jumpScaleMultiplier = new Vector2(0.96f, 1.05f);
-        [SerializeField] private float _jumpStretchDuration = 0.12f;
-        [Tooltip("Yere iniş anındaki ölçek çarpanı (X = Yayılma, Y = Basılma).")]
-        [SerializeField] private Vector2 _landScaleMultiplier = new Vector2(1.04f, 0.95f);
-        [SerializeField] private float _landSquishDuration = 0.1f;
-
         private Rigidbody2D _body;
         private float _lastGroundedTime = float.NegativeInfinity;
         private float _lastJumpPressedTime = float.NegativeInfinity;
-
-        // Gamefeel / Squish & Stretch variables
-        private bool _previouslyGrounded;
-        private Vector3 _initialScale = Vector3.one;
-        private Sequence _squishStretchTween;
 
         private bool IsGrounded => Time.time - _lastGroundedTime <= _coyoteTimeSeconds;
         private bool JumpBuffered => Time.time - _lastJumpPressedTime <= _jumpBufferSeconds;
@@ -58,10 +42,6 @@ namespace Game.Runtime.Player
         {
             _body = GetComponent<Rigidbody2D>();
             _body.freezeRotation = true;
-            _previouslyGrounded = true;
-
-            Transform targetSprite = _spriteParent != null ? _spriteParent : transform;
-            _initialScale = targetSprite.localScale;
         }
 
         private void OnEnable()
@@ -80,14 +60,6 @@ namespace Game.Runtime.Player
 
         private void FixedUpdate()
         {
-            // Grounded state transition check for landing
-            bool isGroundedNow = IsGrounded;
-            if (isGroundedNow && !_previouslyGrounded)
-            {
-                TriggerLandSquish();
-            }
-            _previouslyGrounded = isGroundedNow;
-
             float moveX = _input != null ? _input.Move.x : 0f;
             ApplyHorizontal(moveX);
             TryConsumeBufferedJump();
@@ -108,8 +80,6 @@ namespace Game.Runtime.Player
             _body.linearVelocity = new Vector2(_body.linearVelocity.x, _jumpSpeedUnitsPerSecond);
             _lastJumpPressedTime = float.NegativeInfinity; // consume the buffered press
             _lastGroundedTime = float.NegativeInfinity;    // leave the ground immediately (no double jump)
-
-            TriggerJumpStretch();
         }
 
         private void OnJumpPressed()
@@ -135,28 +105,6 @@ namespace Game.Runtime.Player
                     return;
                 }
             }
-        }
-
-        private void TriggerJumpStretch()
-        {
-            Transform targetSprite = _spriteParent != null ? _spriteParent : transform;
-            _squishStretchTween.Stop();
-            targetSprite.localScale = _initialScale;
-            
-            Vector3 targetScale = new Vector3(_initialScale.x * _jumpScaleMultiplier.x, _initialScale.y * _jumpScaleMultiplier.y, _initialScale.z);
-            _squishStretchTween = Tween.Scale(targetSprite, targetScale, _jumpStretchDuration, ease: Ease.OutQuad)
-                .Chain(Tween.Scale(targetSprite, _initialScale, _jumpStretchDuration * 1.2f, ease: Ease.InOutQuad));
-        }
-
-        private void TriggerLandSquish()
-        {
-            Transform targetSprite = _spriteParent != null ? _spriteParent : transform;
-            _squishStretchTween.Stop();
-            targetSprite.localScale = _initialScale;
-
-            Vector3 targetScale = new Vector3(_initialScale.x * _landScaleMultiplier.x, _initialScale.y * _landScaleMultiplier.y, _initialScale.z);
-            _squishStretchTween = Tween.Scale(targetSprite, targetScale, _landSquishDuration, ease: Ease.OutQuad)
-                .Chain(Tween.Scale(targetSprite, _initialScale, _landSquishDuration * 1.5f, ease: Ease.InOutQuad));
         }
     }
 }
