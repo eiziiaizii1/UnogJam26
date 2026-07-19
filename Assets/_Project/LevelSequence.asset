@@ -21,7 +21,7 @@ MonoBehaviour:
     AppearanceOnEnter: {fileID: 11400000, guid: 17c6e9cc779eb0648abb5530b615f52a, type: 2}
   - SceneName: Level_03
     UpgradeOnEnter: {fileID: 11400000, guid: cdced60cc5283ee458d388428105021c, type: 2}
-    AppearanceOnEnter: {fileID: 0}
+    AppearanceOnEnter: {fileID: 11400000, guid: fe5cf2cd3c91ad6438559211890d06ce, type: 2}
   - SceneName: Level_04
     UpgradeOnEnter: {fileID: 11400000, guid: 762c50159c3fac245b28aa59ac901e28, type: 2}
-    AppearanceOnEnter: {fileID: 0}
+    AppearanceOnEnter: {fileID: 11400000, guid: adba6ac8f19338b4fa5b4d8749088804, type: 2}
