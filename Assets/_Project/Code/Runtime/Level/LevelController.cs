@@ -244,9 +244,9 @@ namespace Game.Runtime.Level
 
             if (explosionPs != null) Destroy(explosionPs.gameObject);
 
-            // 4. Load Credits scene directly while screen is solid black!
+            // 4. Load Outro scene directly while screen is solid black!
             // Since we are already black, loading directly makes it a 100% seamless cinematic transition!
-            UnityEngine.SceneManagement.SceneManager.LoadScene("credits");
+            UnityEngine.SceneManagement.SceneManager.LoadScene("outro");
         }
 
         private ParticleSystem CreateChargeParticles(float xOffset)

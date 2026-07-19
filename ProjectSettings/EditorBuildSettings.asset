@@ -10,20 +10,20 @@ EditorBuildSettings:
     guid: f998308609276e344949772f5c275238
   - enabled: 1
     path: Assets/Scenes/Level_02.unity
-    guid: 96261d60ac862ec4f8f31ed22ba7b771
+    guid: ee1d8c78f78c4c14e941275cbb0835e5
   - enabled: 1
     path: Assets/Scenes/Level_03.unity
     guid: bbbab37cd7998024cb4afc602e6068bd
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Boot 1.unity
     guid: 4f6784a04fdd5fe41a5991beca0c99ba
   - enabled: 1
     path: Assets/Scenes/mainmenu.unity
     guid: e4fd6e3895a98f84c990dc100e5d03c0
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/walking jumping.unity
     guid: 94a07477dcbf32c438ef4495e2c9489e
   - enabled: 1
@@ -32,6 +32,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/credits.unity
     guid: 6685bf4f152a519458e0912cbbc65802
+  - enabled: 1
+    path: Assets/Scenes/intro.unity
+    guid: 0aa1caae885693a41934c94db2a601f3
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

@@ -1929,7 +1929,7 @@ MonoBehaviour:
   _volumeSlider: {fileID: 2092309677}
   _vSyncToggle: {fileID: 558897861}
   _frameLimitDropdown: {fileID: 1488272905}
-  _firstLevelSceneName: Level_01
+  _firstLevelSceneName: intro
 --- !u!4 &673841948
 Transform:
   m_ObjectHideFlags: 0
