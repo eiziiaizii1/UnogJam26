@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Game.Runtime.UI;
+using Game.Runtime.Audio;
 
 namespace Game.Editor.Sandbox
 {
@@ -208,6 +209,27 @@ namespace Game.Editor.Sandbox
             pmSerialized.FindProperty("_frameLimitDropdown").objectReferenceValue = frameDropdown;
             pmSerialized.ApplyModifiedProperties();
 
+            // 7. Add JuicyPanel to Pause Panel (very subtle float)
+            var jp = panelGo.AddComponent<JuicyPanel>();
+            var jpSerialized = new SerializedObject(jp);
+            jpSerialized.FindProperty("_floatDistance").floatValue = 6f;
+            jpSerialized.FindProperty("_swayAngle").floatValue = 0.4f;
+            jpSerialized.ApplyModifiedProperties();
+
+            // 8. Add JuicyButton to buttons
+            var clickSfx = AssetDatabase.LoadAssetAtPath<SfxDefinition>("Assets/_Project/Data/Audio/Sfx_Pickup.asset");
+            Button[] pmButtons = { resumeBtn, mainMenuBtn, exitBtn };
+            foreach (var btn in pmButtons)
+            {
+                var jb = btn.gameObject.AddComponent<JuicyButton>();
+                var jbSerialized = new SerializedObject(jb);
+                if (clickSfx != null)
+                {
+                    jbSerialized.FindProperty("_clickSfx").objectReferenceValue = clickSfx;
+                }
+                jbSerialized.ApplyModifiedProperties();
+            }
+
             // Save Prefab
             PrefabUtility.SaveAsPrefabAsset(go, PauseMenuPrefabPath);
             Object.DestroyImmediate(go);
@@ -216,32 +238,125 @@ namespace Game.Editor.Sandbox
 
         private static void SetupMainMenuScene()
         {
-            // Open mainmenu scene
             var scene = EditorSceneManager.OpenScene(MainMenuScenePath, OpenSceneMode.Single);
-            
-            // Clean up existing MainMenu controller or Canvas
-            var existingMainMenu = Object.FindFirstObjectByType<MainMenu>();
-            if (existingMainMenu != null)
-            {
-                Object.DestroyImmediate(existingMainMenu.gameObject);
-            }
 
+            // Find the Canvas
             var canvasGo = GameObject.Find("Canvas");
             if (canvasGo == null)
             {
-                canvasGo = new GameObject("Canvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
-                var canvas = canvasGo.GetComponent<Canvas>();
-                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-                var scaler = canvasGo.GetComponent<CanvasScaler>();
-                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-                scaler.referenceResolution = new Vector2(1920, 1080);
+                BuildDefaultMainMenuUI();
+                return;
             }
 
-            // Create MainMenu Manager Host
+            // Find or add MainMenu controller
+            var mm = Object.FindFirstObjectByType<MainMenu>();
+            if (mm == null)
+            {
+                var mmHost = GameObject.Find("MainMenuController");
+                if (mmHost == null)
+                {
+                    mmHost = new GameObject("MainMenuController");
+                }
+                mm = mmHost.AddComponent<MainMenu>();
+            }
+
+            // Locate components in the Canvas
+            var allButtons = canvasGo.GetComponentsInChildren<Button>(true);
+            var playBtn = FindButtonByName(allButtons, "Play");
+            var settingsBtn = FindButtonByName(allButtons, "Settings");
+            var exitBtn = FindButtonByName(allButtons, "Exit");
+            var backBtn = FindButtonByName(allButtons, "Back");
+
+            var volumeSlider = canvasGo.GetComponentInChildren<Slider>(true);
+            var vsyncToggle = canvasGo.GetComponentInChildren<Toggle>(true);
+            var frameLimitDropdown = canvasGo.GetComponentInChildren<TMP_Dropdown>(true);
+
+            // Identify the panels
+            var mainMenuPanel = canvasGo.transform.Find("MainMenuPanel")?.gameObject;
+            if (mainMenuPanel == null) mainMenuPanel = canvasGo.transform.Find("Main Menu")?.gameObject;
+            if (mainMenuPanel == null) mainMenuPanel = playBtn != null ? playBtn.transform.parent.gameObject : null;
+
+            var settingsPanel = canvasGo.transform.Find("SettingsPanel")?.gameObject;
+            if (settingsPanel == null) settingsPanel = canvasGo.transform.Find("Settings")?.gameObject;
+
+            // Wire MainMenu fields
+            var mmSerialized = new SerializedObject(mm);
+            if (mainMenuPanel != null) mmSerialized.FindProperty("_mainMenuPanel").objectReferenceValue = mainMenuPanel;
+            if (settingsPanel != null) mmSerialized.FindProperty("_settingsPanel").objectReferenceValue = settingsPanel;
+            if (playBtn != null) mmSerialized.FindProperty("_playButton").objectReferenceValue = playBtn;
+            if (settingsBtn != null) mmSerialized.FindProperty("_settingsButton").objectReferenceValue = settingsBtn;
+            if (exitBtn != null) mmSerialized.FindProperty("_exitButton").objectReferenceValue = exitBtn;
+            if (backBtn != null) mmSerialized.FindProperty("_settingsBackButton").objectReferenceValue = backBtn;
+            if (volumeSlider != null) mmSerialized.FindProperty("_volumeSlider").objectReferenceValue = volumeSlider;
+            if (vsyncToggle != null) mmSerialized.FindProperty("_vSyncToggle").objectReferenceValue = vsyncToggle;
+            if (frameLimitDropdown != null) mmSerialized.FindProperty("_frameLimitDropdown").objectReferenceValue = frameLimitDropdown;
+            mmSerialized.ApplyModifiedProperties();
+
+            // Load default audio asset
+            var clickSfx = AssetDatabase.LoadAssetAtPath<SfxDefinition>("Assets/_Project/Data/Audio/Sfx_Pickup.asset");
+
+            // Attach JuicyButton component to all buttons non-destructively
+            foreach (var btn in allButtons)
+            {
+                var jb = btn.GetComponent<JuicyButton>();
+                if (jb == null)
+                {
+                    jb = btn.gameObject.AddComponent<JuicyButton>();
+                }
+                var jbSerialized = new SerializedObject(jb);
+                if (clickSfx != null)
+                {
+                    jbSerialized.FindProperty("_clickSfx").objectReferenceValue = clickSfx;
+                }
+                jbSerialized.ApplyModifiedProperties();
+            }
+
+            // Find the wooden panel and attach JuicyPanel for sways & floating loops!
+            if (mainMenuPanel != null && mainMenuPanel != canvasGo)
+            {
+                var jp = mainMenuPanel.GetComponent<JuicyPanel>();
+                if (jp == null)
+                {
+                    jp = mainMenuPanel.AddComponent<JuicyPanel>();
+                }
+            }
+
+            if (settingsPanel != null && settingsPanel != canvasGo)
+            {
+                var jp = settingsPanel.GetComponent<JuicyPanel>();
+                if (jp == null)
+                {
+                    jp = settingsPanel.AddComponent<JuicyPanel>();
+                }
+            }
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            Debug.Log("[MenuPrefabsBuilder] Configured juicy animations and preserved user's MainMenu UI setup.");
+        }
+
+        private static void BuildDefaultMainMenuUI()
+        {
+            var canvasGo = new GameObject("Canvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            var canvas = canvasGo.GetComponent<Canvas>();
+            var mainCam = Camera.main;
+            if (mainCam != null)
+            {
+                canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                canvas.worldCamera = mainCam;
+                canvas.planeDistance = 5f;
+            }
+            else
+            {
+                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            }
+            var scaler = canvasGo.GetComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920, 1080);
+
             var mmHost = new GameObject("MainMenuController", typeof(MainMenu));
             var mm = mmHost.GetComponent<MainMenu>();
 
-            // 1. Main Panel
             var mainPanel = new GameObject("MainMenuPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             mainPanel.transform.SetParent(canvasGo.transform, false);
             var mpRt = mainPanel.GetComponent<RectTransform>();
@@ -250,7 +365,6 @@ namespace Game.Editor.Sandbox
             mpRt.sizeDelta = Vector2.zero;
             mainPanel.GetComponent<Image>().color = DeepGreen;
 
-            // Main Title
             var titleGo = new GameObject("TitleText", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
             titleGo.transform.SetParent(mainPanel.transform, false);
             var titleRt = titleGo.GetComponent<RectTransform>();
@@ -266,12 +380,10 @@ namespace Game.Editor.Sandbox
             titleTxt.color = CreamWhite;
             titleTxt.fontStyle = FontStyles.Bold;
 
-            // Main Buttons
             var playBtn = CreateButton(mainPanel, "Play", new Vector2(350, 70), new Vector2(0, 40), ButtonGreen, CreamWhite);
             var settingsBtn = CreateButton(mainPanel, "Settings", new Vector2(350, 70), new Vector2(0, -40), WoodBrown, CreamWhite);
             var exitBtn = CreateButton(mainPanel, "Exit", new Vector2(350, 70), new Vector2(0, -120), new Color(0.6f, 0.2f, 0.2f, 1f), CreamWhite);
 
-            // 2. Settings Panel
             var settingsPanel = new GameObject("SettingsPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             settingsPanel.transform.SetParent(canvasGo.transform, false);
             var spRt = settingsPanel.GetComponent<RectTransform>();
@@ -281,7 +393,6 @@ namespace Game.Editor.Sandbox
             settingsPanel.GetComponent<Image>().color = DeepGreen;
             settingsPanel.SetActive(false);
 
-            // Settings Title
             var sTitleGo = new GameObject("SettingsTitle", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
             sTitleGo.transform.SetParent(settingsPanel.transform, false);
             var sTitleRt = sTitleGo.GetComponent<RectTransform>();
@@ -297,7 +408,6 @@ namespace Game.Editor.Sandbox
             sTitleTxt.color = CreamWhite;
             sTitleTxt.fontStyle = FontStyles.Bold;
 
-            // Settings Volume Slider (positioned at Y=20)
             var sliderContainer = new GameObject("VolumeSliderContainer", typeof(RectTransform));
             sliderContainer.transform.SetParent(settingsPanel.transform, false);
             var scRt = sliderContainer.GetComponent<RectTransform>();
@@ -320,7 +430,6 @@ namespace Game.Editor.Sandbox
             labelTxt.alignment = TextAlignmentOptions.Center;
             labelTxt.color = CreamWhite;
 
-            // Slider Component
             var sliderGo = new GameObject("Slider", typeof(RectTransform), typeof(Slider));
             sliderGo.transform.SetParent(sliderContainer.transform, false);
             var sliderRt = sliderGo.GetComponent<RectTransform>();
@@ -356,16 +465,10 @@ namespace Game.Editor.Sandbox
 
             slider.fillRect = fillRt;
 
-            // Settings VSync Toggle (Y=-70)
             var vsyncToggle = CreateToggle(settingsPanel, "VSyncToggle", new Vector2(250, 30), new Vector2(-50, -70), "VSync Enabled");
-
-            // Settings Frame Limit Dropdown (Y=-140)
             var frameDropdown = CreateDropdown(settingsPanel, "FrameLimitDropdown", new Vector2(250, 40), new Vector2(0, -140));
-
-            // Back button in settings (Y=-230)
             var backBtn = CreateButton(settingsPanel, "Back", new Vector2(350, 70), new Vector2(0, -230), WoodBrown, CreamWhite);
 
-            // Link MainMenu
             var mmSerialized = new SerializedObject(mm);
             mmSerialized.FindProperty("_mainMenuPanel").objectReferenceValue = mainPanel;
             mmSerialized.FindProperty("_settingsPanel").objectReferenceValue = settingsPanel;
@@ -378,10 +481,41 @@ namespace Game.Editor.Sandbox
             mmSerialized.FindProperty("_frameLimitDropdown").objectReferenceValue = frameDropdown;
             mmSerialized.ApplyModifiedProperties();
 
-            // Save scene changes
-            EditorSceneManager.MarkSceneDirty(scene);
-            EditorSceneManager.SaveScene(scene);
-            Debug.Log($"[MenuPrefabsBuilder] Configured UI components and saved mainmenu scene: {MainMenuScenePath}");
+            // Add sfx
+            var clickSfx = AssetDatabase.LoadAssetAtPath<SfxDefinition>("Assets/_Project/Data/Audio/Sfx_Pickup.asset");
+            Button[] buttons = { playBtn, settingsBtn, exitBtn, backBtn };
+            foreach (var btn in buttons)
+            {
+                var jb = btn.gameObject.AddComponent<JuicyButton>();
+                var jbSerialized = new SerializedObject(jb);
+                if (clickSfx != null)
+                {
+                    jbSerialized.FindProperty("_clickSfx").objectReferenceValue = clickSfx;
+                }
+                jbSerialized.ApplyModifiedProperties();
+            }
+
+            var jp = mainPanel.AddComponent<JuicyPanel>();
+            var jpSerialized = new SerializedObject(jp);
+            jpSerialized.FindProperty("_floatDistance").floatValue = 10f;
+            jpSerialized.FindProperty("_swayAngle").floatValue = 1.2f;
+            jpSerialized.ApplyModifiedProperties();
+
+            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+            EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
+            Debug.Log("[MenuPrefabsBuilder] Built default MainMenu UI hierarchy.");
+        }
+
+        private static Button FindButtonByName(Button[] buttons, string keyword)
+        {
+            foreach (var btn in buttons)
+            {
+                if (btn.name.ToLower().Contains(keyword.ToLower()))
+                {
+                    return btn;
+                }
+            }
+            return null;
         }
 
         private static Button CreateButton(GameObject parent, string textStr, Vector2 size, Vector2 anchoredPos, Color bgColor, Color textColor)

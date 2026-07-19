@@ -34,20 +34,6 @@ namespace Game.Runtime.UI
                     Debug.LogWarning("[PauseMenuAutoInstaller] ScreenTransition prefab not found in Resources folder.");
                 }
             }
-
-            // 3. Ensure PauseMenu is present
-            if (Object.FindFirstObjectByType<PauseMenu>() == null)
-            {
-                var pausePrefab = Resources.Load<GameObject>("PauseMenu");
-                if (pausePrefab != null)
-                {
-                    Object.Instantiate(pausePrefab);
-                }
-                else
-                {
-                    Debug.LogWarning("[PauseMenuAutoInstaller] PauseMenu prefab not found in Resources folder.");
-                }
-            }
         }
     }
 }

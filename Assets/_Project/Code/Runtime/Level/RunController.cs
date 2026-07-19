@@ -177,7 +177,8 @@ namespace Game.Runtime.Level
 
             if (_levels.IsLastLevel(State.LevelIndex))
             {
-                Debug.Log($"[Run] Final level complete — collectibles: {State.Collectibles}. (Ending sequence lands in M4.)");
+                Debug.Log($"[Run] Final level complete — loading Credits scene!");
+                StartCoroutine(TransitionToCredits());
                 return;
             }
 
@@ -239,6 +240,22 @@ namespace Game.Runtime.Level
             else
             {
                 SceneManager.LoadScene(sceneName);
+            }
+        }
+
+        private IEnumerator TransitionToCredits()
+        {
+            _transitioning = true;
+            yield return new WaitForSeconds(_levelCompleteDelaySeconds);
+            _transitioning = false;
+
+            if (UI.ScreenTransition.Instance != null)
+            {
+                UI.ScreenTransition.Instance.TransitionToScene("credits");
+            }
+            else
+            {
+                SceneManager.LoadScene("credits");
             }
         }
     }

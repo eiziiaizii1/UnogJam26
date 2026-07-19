@@ -45,7 +45,23 @@ namespace Game.Runtime.Combat
             bool tookDamage = current < _lastKnownHealth;
             _lastKnownHealth = current;
 
-            if (!tookDamage || _renderer == null) return;
+            if (!tookDamage) return;
+
+            // Trigger screen shake
+            var mainCamera = Camera.main;
+            if (mainCamera != null && mainCamera.TryGetComponent<Game.Runtime.Presentation.CameraFollow>(out var follow))
+            {
+                if (CompareTag("Player") || GetComponent<Game.Runtime.Player.PlayerMotor>() != null)
+                {
+                    follow.Shake(0.35f, 6f); // Heavy shake when player gets hit
+                }
+                else
+                {
+                    follow.Shake(0.08f, 10f); // Subtle feedback shake when hitting enemies/crates
+                }
+            }
+
+            if (_renderer == null) return;
             if (_routine != null) StopCoroutine(_routine);
             _routine = StartCoroutine(Flash());
         }

@@ -1,5 +1,6 @@
 using Game.Runtime.Events;
 using UnityEngine;
+using PrimeTween;
 
 namespace Game.Runtime.Collectibles
 {
@@ -39,7 +40,20 @@ namespace Game.Runtime.Collectibles
 
             _collected = true;
             if (_pickedChannel != null) _pickedChannel.Raise(_value);
-            Destroy(gameObject);
+
+            // Disable components to prevent further interaction or bobbing
+            var col = GetComponent<Collider2D>();
+            if (col != null) col.enabled = false;
+            enabled = false;
+
+            // Animate scale-down and alpha-fade
+            var sr = GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                Tween.Alpha(sr, 0f, 0.2f);
+            }
+            Tween.Scale(transform, Vector3.zero, 0.2f, Ease.InBack)
+                .OnComplete(() => Destroy(gameObject));
         }
     }
 }

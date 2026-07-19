@@ -31,6 +31,9 @@ namespace Game.Runtime.Player
         [Tooltip("A contact counts as ground when its normal.y is at least this (1 = flat floor).")]
         [SerializeField] private float _minGroundNormalY = 0.5f;
 
+        [Header("Effects")]
+        [SerializeField] private ParticleSystem _footstepDust;
+
         private Rigidbody2D _body;
         private float _lastGroundedTime = float.NegativeInfinity;
         private float _lastJumpPressedTime = float.NegativeInfinity;
@@ -70,6 +73,7 @@ namespace Game.Runtime.Player
             float moveX = _input != null ? _input.Move.x : 0f;
             ApplyHorizontal(moveX);
             TryConsumeBufferedJump();
+            UpdateDustEmission();
         }
 
         private void ApplyHorizontal(float moveInput)
@@ -87,6 +91,23 @@ namespace Game.Runtime.Player
             _body.linearVelocity = new Vector2(_body.linearVelocity.x, _jumpSpeedUnitsPerSecond);
             _lastJumpPressedTime = float.NegativeInfinity; // consume the buffered press
             _lastGroundedTime = float.NegativeInfinity;    // leave the ground immediately (no double jump)
+
+            // Jump burst effect
+            if (_footstepDust != null)
+            {
+                _footstepDust.Emit(6);
+            }
+        }
+
+        private void UpdateDustEmission()
+        {
+            if (_footstepDust == null) return;
+            var emission = _footstepDust.emission;
+            bool shouldEmit = IsGrounded && Mathf.Abs(_body.linearVelocity.x) > 0.2f && _input != null && Mathf.Abs(_input.Move.x) > 0.1f;
+            if (emission.enabled != shouldEmit)
+            {
+                emission.enabled = shouldEmit;
+            }
         }
 
         private void OnJumpPressed()
@@ -104,13 +125,23 @@ namespace Game.Runtime.Player
 
         private void OnCollisionStay2D(Collision2D collision)
         {
+            bool wasGrounded = IsGrounded;
+            bool foundGround = false;
+
             for (int i = 0; i < collision.contactCount; i++)
             {
                 if (collision.GetContact(i).normal.y >= _minGroundNormalY)
                 {
                     _lastGroundedTime = Time.time;
-                    return;
+                    foundGround = true;
+                    break;
                 }
+            }
+
+            // Landing burst effect
+            if (foundGround && !wasGrounded && _footstepDust != null)
+            {
+                _footstepDust.Emit(5);
             }
         }
     }

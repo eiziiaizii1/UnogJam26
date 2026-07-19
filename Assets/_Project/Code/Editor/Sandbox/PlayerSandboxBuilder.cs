@@ -588,5 +588,111 @@ namespace Game.Editor.Sandbox
             
             Debug.Log($"[PlayerAnimatorSetup] Successfully migrated SpriteRenderer to 'Visuals' child and wired PlayerSpriteAnimator on prefab {prefabPath}");
         }
+
+        [MenuItem("Tools/IloveNature/Setup Player Footstep Dust")]
+        public static void SetupPlayerFootstepDust()
+        {
+            var prefabPath = "Assets/_Project/Content/prefabs/Player.prefab";
+            var playerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            if (playerPrefab == null)
+            {
+                Debug.LogError($"[PlayerDustSetup] Player prefab not found at {prefabPath}");
+                return;
+            }
+
+            var rootGo = PrefabUtility.LoadPrefabContents(prefabPath);
+
+            // 1. Locate or create FootstepDust child
+            var dustTransform = rootGo.transform.Find("FootstepDust");
+            GameObject dustGo;
+            if (dustTransform == null)
+            {
+                dustGo = new GameObject("FootstepDust");
+                dustGo.transform.SetParent(rootGo.transform, false);
+                dustGo.transform.localPosition = new Vector3(0f, -0.6f, 0f); // Offset to player's feet
+                dustGo.transform.localRotation = Quaternion.identity;
+                dustGo.transform.localScale = Vector3.one;
+            }
+            else
+            {
+                dustGo = dustTransform.gameObject;
+            }
+
+            // 2. Setup ParticleSystem
+            var ps = dustGo.GetComponent<ParticleSystem>();
+            if (ps == null)
+            {
+                ps = dustGo.AddComponent<ParticleSystem>();
+            }
+
+            // Configure modules
+            var main = ps.main;
+            main.duration = 1f;
+            main.loop = true;
+            main.playOnAwake = true;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(0.2f, 0.4f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(0.5f, 1.2f);
+            main.startSize = new ParticleSystem.MinMaxCurve(0.12f, 0.22f);
+            main.startRotation = new ParticleSystem.MinMaxCurve(0f, 360f);
+            main.gravityModifier = -0.05f; // floats up very slightly
+            main.simulationSpace = ParticleSystemSimulationSpace.World; // stays on ground
+            main.maxParticles = 50;
+
+            var emission = ps.emission;
+            emission.enabled = false; // PlayerMotor controls active emission
+            emission.rateOverTime = 0f;
+            emission.rateOverDistance = 5f; // automatically spawns when moving!
+
+            var shape = ps.shape;
+            shape.enabled = true;
+            shape.shapeType = ParticleSystemShapeType.Circle;
+            shape.radius = 0.15f;
+            shape.rotation = new Vector3(90f, 0f, 0f); // align circle parallel to ground
+
+            // Size over lifetime
+            var sizeOverLifetime = ps.sizeOverLifetime;
+            sizeOverLifetime.enabled = true;
+            AnimationCurve sizeCurve = new AnimationCurve();
+            sizeCurve.AddKey(0f, 1f);
+            sizeCurve.AddKey(1f, 0.2f);
+            sizeOverLifetime.size = new ParticleSystem.MinMaxCurve(1f, sizeCurve);
+
+            // Color over lifetime (fade out)
+            var colorOverLifetime = ps.colorOverLifetime;
+            colorOverLifetime.enabled = true;
+            Gradient gradient = new Gradient();
+            gradient.SetKeys(
+                new GradientColorKey[] { new GradientColorKey(new Color(0.85f, 0.82f, 0.76f), 0f), new GradientColorKey(new Color(0.85f, 0.82f, 0.76f), 1f) },
+                new GradientAlphaKey[] { new GradientAlphaKey(0.75f, 0f), new GradientAlphaKey(0f, 1f) }
+            );
+            colorOverLifetime.color = new ParticleSystem.MinMaxGradient(gradient);
+
+            // Particle Renderer Settings (style as soft dots)
+            var psr = dustGo.GetComponent<ParticleSystemRenderer>();
+            if (psr != null)
+            {
+                psr.sortingOrder = 9; // just behind player sprite
+                // Use default Sprites material
+                var spritesDefault = AssetDatabase.GetBuiltinExtraResource<Material>("Sprites-Default.mat");
+                if (spritesDefault != null)
+                {
+                    psr.sharedMaterial = spritesDefault;
+                }
+            }
+
+            // 3. Link to PlayerMotor component
+            var motor = rootGo.GetComponent<PlayerMotor>();
+            if (motor != null)
+            {
+                var motorSerialized = new SerializedObject(motor);
+                motorSerialized.FindProperty("_footstepDust").objectReferenceValue = ps;
+                motorSerialized.ApplyModifiedProperties();
+            }
+
+            PrefabUtility.SaveAsPrefabAsset(rootGo, prefabPath);
+            PrefabUtility.UnloadPrefabContents(rootGo);
+
+            Debug.Log($"[PlayerDustSetup] Successfully created and configured footstep dust ParticleSystem on player prefab at {prefabPath}");
+        }
     }
 }
