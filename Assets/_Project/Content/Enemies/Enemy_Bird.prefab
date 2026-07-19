@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 3685643538203824628}
   - component: {fileID: 1591108972899128797}
   - component: {fileID: 5474566989407698129}
+  - component: {fileID: 5932248488206457847}
   m_Layer: 0
   m_Name: Enemy_Bird
   m_TagString: Untagged
@@ -181,6 +182,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _definition: {fileID: 11400000, guid: c2d6ca830088aa9468ca77ca186e7967, type: 2}
   _visuals: {fileID: 1702832089871537618}
+--- !u!114 &5932248488206457847
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4149087348787120731}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a923487ad7db3c1498b2b9ecd9db1a5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dropPrefab: {fileID: 886209268325649247, guid: f6d8bd5046bf09b4a8dfb5468620ab4a, type: 3}
+  _minCount: 1
+  _maxCount: 1
+  _dropChance: 0.6
+  _spawnOffset: {x: 0, y: 0.25}
+  _scatterRadius: 0.45
+  _snapToGround: 1
+  _rayStartHeight: 1.5
+  _rayMaxDistance: 6
+  _groundClearance: 0.45000002
 --- !u!1 &5362606372148237240
 GameObject:
   m_ObjectHideFlags: 0

@@ -150,6 +150,7 @@ GameObject:
   - component: {fileID: 3027645339704106645}
   - component: {fileID: 3794757503434851842}
   - component: {fileID: 48461025509676861}
+  - component: {fileID: 1842129086249587589}
   m_Layer: 0
   m_Name: Enemy_Boar
   m_TagString: Untagged
@@ -315,3 +316,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _definition: {fileID: 11400000, guid: 62b6952932f0dc8478d4f17e19f423f9, type: 2}
   _visuals: {fileID: 1067625495979082787}
+--- !u!114 &1842129086249587589
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4963841146413761497}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a923487ad7db3c1498b2b9ecd9db1a5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dropPrefab: {fileID: 886209268325649247, guid: f6d8bd5046bf09b4a8dfb5468620ab4a, type: 3}
+  _minCount: 1
+  _maxCount: 2
+  _dropChance: 1
+  _spawnOffset: {x: 0, y: 0.25}
+  _scatterRadius: 0.45
+  _snapToGround: 1
+  _rayStartHeight: 1.5
+  _rayMaxDistance: 6
+  _groundClearance: 0.45000002

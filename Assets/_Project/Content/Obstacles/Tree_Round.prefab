@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1210495419637899183}
   - component: {fileID: 5193914334328290579}
   - component: {fileID: 9192738016288206527}
+  - component: {fileID: 7802642880539399443}
   m_Layer: 0
   m_Name: Tree_Round
   m_TagString: Untagged
@@ -123,6 +124,28 @@ MonoBehaviour:
   _renderer: {fileID: 2336180017549748066}
   _flashColor: {r: 1, g: 0.35, b: 0.35, a: 1}
   _flashSeconds: 0.1
+--- !u!114 &7802642880539399443
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2835101022529125961}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a923487ad7db3c1498b2b9ecd9db1a5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dropPrefab: {fileID: 886209268325649247, guid: f6d8bd5046bf09b4a8dfb5468620ab4a, type: 3}
+  _minCount: 1
+  _maxCount: 2
+  _dropChance: 1
+  _spawnOffset: {x: 0, y: 0.25}
+  _scatterRadius: 0.45
+  _snapToGround: 1
+  _rayStartHeight: 1.5
+  _rayMaxDistance: 6
+  _groundClearance: 0.45000002
 --- !u!1 &3244116864754188623
 GameObject:
   m_ObjectHideFlags: 0
