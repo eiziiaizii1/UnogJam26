@@ -43,8 +43,22 @@ namespace Game.Runtime.Boot
             // Services are constructed and brought up here in a documented order (Guide §5.3)
             // as later milestones add them. M0 has no gameplay services yet.
 
+            float volume = PlayerPrefs.GetFloat("Volume", 1f);
+            AudioListener.volume = volume;
+
+            int vsync = PlayerPrefs.GetInt("VSync", 1);
+            QualitySettings.vSyncCount = vsync;
+
+            int limit = PlayerPrefs.GetInt("FrameLimit", -1);
+            Application.targetFrameRate = limit;
+
             _flow.Enter(GameState.Menu);
-            _flow.Enter(GameState.Gameplay); // M0: empty gameplay state, no content.
+
+            string activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.ToLower();
+            if (activeScene != "mainmenu" && activeScene != "boot" && activeScene != "boot 1")
+            {
+                _flow.Enter(GameState.Gameplay);
+            }
         }
 
         private void OnStateChanged(GameState from, GameState to)

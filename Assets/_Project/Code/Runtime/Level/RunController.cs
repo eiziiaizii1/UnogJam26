@@ -158,7 +158,14 @@ namespace Game.Runtime.Level
             Debug.Log($"[Run] Level {State.LevelIndex} → loading '{scene}'.");
 
             _transitioning = false;
-            SceneManager.LoadScene(scene);
+            if (UI.ScreenTransition.Instance != null)
+            {
+                UI.ScreenTransition.Instance.TransitionToScene(scene);
+            }
+            else
+            {
+                SceneManager.LoadScene(scene);
+            }
         }
 
         private IEnumerator ReloadCurrentLevel()
@@ -167,7 +174,15 @@ namespace Game.Runtime.Level
             yield return new WaitForSeconds(_respawnDelaySeconds);
 
             _transitioning = false;
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            string sceneName = SceneManager.GetActiveScene().name;
+            if (UI.ScreenTransition.Instance != null)
+            {
+                UI.ScreenTransition.Instance.TransitionToScene(sceneName);
+            }
+            else
+            {
+                SceneManager.LoadScene(sceneName);
+            }
         }
     }
 }

@@ -3,7 +3,8 @@
     "rootNamespace": "Game.Editor",
     "references": [
         "Game.Core",
-        "Game.Runtime"
+        "Game.Runtime",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [
         "Editor"
