@@ -14,6 +14,11 @@ namespace Game.Runtime.Player
         [Header("References")]
         [SerializeField] private InputReader _input;
         [SerializeField] private SpriteRenderer _renderer;
+
+        [Header("Appearance")]
+        [Tooltip("Look applied at Awake. RunController overrides this per level; the inline arrays " +
+                 "below are only used when no appearance is assigned.")]
+        [SerializeField] private PlayerAppearance _appearance;
         
         [Header("Idle Sprites")]
         [Tooltip("Looping idle. The current art is front-facing, so both directions can share it.")]
@@ -56,6 +61,34 @@ namespace Game.Runtime.Player
             {
                 _input = GetComponent<InputReader>();
             }
+
+            if (_appearance != null) ApplyAppearance(_appearance);
+        }
+
+        /// <summary>
+        /// Swaps every clip to a different robot look. Safe to call at runtime — the frame index is
+        /// reset because the new look may have fewer frames than the current one (robot 1 walks in
+        /// 2, robot 2 in 3), and a stale index would read past the end.
+        /// </summary>
+        public void ApplyAppearance(PlayerAppearance appearance)
+        {
+            if (appearance == null) return;
+
+            _appearance = appearance;
+            _idleRight = appearance.IdleRight;
+            _idleLeft = appearance.IdleLeft;
+            _walkRight = appearance.WalkRight;
+            _walkLeft = appearance.WalkLeft;
+            _jumpRight = appearance.JumpRight;
+            _jumpLeft = appearance.JumpLeft;
+
+            _currentFrame = 0;
+            _animationTimer = 0f;
+
+            // Show the new look immediately rather than waiting for the next Update, so the swap
+            // can't be seen as a one-frame flash of the old robot.
+            var idle = _facingRight ? _idleRight : _idleLeft;
+            if (_renderer != null && idle != null && idle.Length > 0) _renderer.sprite = idle[0];
         }
 
         private void OnCollisionStay2D(Collision2D collision)

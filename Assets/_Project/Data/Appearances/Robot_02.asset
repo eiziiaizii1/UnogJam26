@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6103c382ed8f5104f90a3127f9e6da4d, type: 3}
+  m_Name: Robot_02
+  m_EditorClassIdentifier: 
+  _displayName: Robot Mk.II
+  _idleRight:
+  - {fileID: -5464365131285832962, guid: 4869553ee11d7d34e8ca7f413fc2763f, type: 3}
+  - {fileID: 486428704100931084, guid: 4869553ee11d7d34e8ca7f413fc2763f, type: 3}
+  _idleLeft:
+  - {fileID: -5464365131285832962, guid: 4869553ee11d7d34e8ca7f413fc2763f, type: 3}
+  - {fileID: 486428704100931084, guid: 4869553ee11d7d34e8ca7f413fc2763f, type: 3}
+  _walkRight:
+  - {fileID: -2998906734425745525, guid: e22a5a35e0a31b34fbad8221a08a60fc, type: 3}
+  - {fileID: -5682807068461660991, guid: e22a5a35e0a31b34fbad8221a08a60fc, type: 3}
+  - {fileID: 310219461481093299, guid: e22a5a35e0a31b34fbad8221a08a60fc, type: 3}
+  _walkLeft:
+  - {fileID: 9031269153070320002, guid: 6d5cfb86cc358034ca596c5d96187e2a, type: 3}
+  - {fileID: 6875774504088084071, guid: 6d5cfb86cc358034ca596c5d96187e2a, type: 3}
+  - {fileID: 3022798605110227241, guid: 6d5cfb86cc358034ca596c5d96187e2a, type: 3}
+  _jumpRight:
+  - {fileID: -5689202643331889849, guid: e701a3d1f6440aa4ba63988a8630831f, type: 3}
+  - {fileID: 5807024315731769121, guid: e701a3d1f6440aa4ba63988a8630831f, type: 3}
+  - {fileID: -1324807862908674797, guid: e701a3d1f6440aa4ba63988a8630831f, type: 3}
+  _jumpLeft:
+  - {fileID: 815668055493350539, guid: f1871b217f3204b4280011e1000b88aa, type: 3}
+  - {fileID: -3315698337361285366, guid: f1871b217f3204b4280011e1000b88aa, type: 3}
+  - {fileID: -4739890809326755217, guid: f1871b217f3204b4280011e1000b88aa, type: 3}

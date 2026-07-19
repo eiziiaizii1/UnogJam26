@@ -1,6 +1,7 @@
 using System.Collections;
 using Game.Core.Run;
 using Game.Runtime.Events;
+using Game.Runtime.Presentation;
 using Game.Runtime.Upgrades;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -37,6 +38,8 @@ namespace Game.Runtime.Level
         public RunState State { get; } = new();
 
         private bool _transitioning;
+        private bool _announceLevelUp;
+        private string _pendingLevelUpMessage;
 
         private void Awake()
         {
@@ -100,16 +103,64 @@ namespace Game.Runtime.Level
         /// </summary>
         private void ApplyEarnedUpgrades()
         {
-            if (_levels == null || State.LevelIndex <= 0) return;
+            if (_levels == null) return;
 
-            var player = GameObject.FindWithTag("Player");
-            if (player == null) return;
+            var player = FindPlayer();
+            if (player == null)
+            {
+                Debug.LogWarning($"[{nameof(RunController)}] No player found in the loaded scene — upgrades skipped.", this);
+                return;
+            }
+
+            // Appearance is not cumulative and applies on level 0 too, so it runs before the
+            // upgrade loop's early-out.
+            ApplyAppearance(player);
+
+            if (State.LevelIndex <= 0) return;
 
             for (int i = 1; i <= State.LevelIndex; i++)
             {
                 var upgrade = _levels.GetUpgradeOnEnter(i);
                 if (upgrade != null) UpgradeService.Apply(upgrade, player);
             }
+
+            // Only announce a genuinely new upgrade. Respawn reloads re-apply the same list and
+            // must stay silent, or dying would look like levelling up.
+            if (_announceLevelUp)
+            {
+                _announceLevelUp = false;
+                var indicator = player.GetComponentInChildren<LevelUpIndicator>(true);
+                if (indicator != null) indicator.Play(_pendingLevelUpMessage);
+            }
+        }
+
+        /// <summary>
+        /// Swaps the robot's look to whatever this level authored. Silent when the sequence defines
+        /// no appearance at all, so the prefab's own sprites remain the default.
+        /// </summary>
+        private void ApplyAppearance(GameObject player)
+        {
+            var appearance = _levels.GetAppearanceFor(State.LevelIndex);
+            if (appearance == null) return;
+
+            var animator = player.GetComponentInChildren<Game.Runtime.Player.PlayerSpriteAnimator>(true);
+            if (animator == null) return;
+
+            animator.ApplyAppearance(appearance);
+        }
+
+        /// <summary>
+        /// Tag first (cheap), then a component sweep. The Player prefab was untagged for most of the
+        /// jam, which made the tag-only lookup fail silently and skip every upgrade — the fallback
+        /// means a forgotten tag degrades to "slower" rather than "broken".
+        /// </summary>
+        private static GameObject FindPlayer()
+        {
+            var tagged = GameObject.FindWithTag("Player");
+            if (tagged != null) return tagged;
+
+            var motor = FindAnyObjectByType<Game.Runtime.Player.PlayerMotor>();
+            return motor != null ? motor.gameObject : null;
         }
 
         private void OnCollectiblePicked(int amount) => State.AddCollectibles(amount);
@@ -152,6 +203,12 @@ namespace Game.Runtime.Level
             {
                 State.RecordUpgrade(earned.Id);
                 Debug.Log($"[Run] Upgrade earned: {earned.DisplayName}");
+
+                // Armed here, consumed by the next scene load — the player it belongs to doesn't exist yet.
+                // Null keeps the indicator's own authored headline ("LEVEL UP!"); the upgrade's
+                // DisplayName is internal data ("Upgrade-1") and reads badly on screen.
+                _announceLevelUp = true;
+                _pendingLevelUpMessage = null;
             }
 
             string scene = _levels.GetSceneName(State.LevelIndex);
