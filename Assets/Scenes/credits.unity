@@ -304,9 +304,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "<color=#40916C><size=72>I LOVE NATURE</size></color>\n\n\n\n4>-- Game
-    Developers --</color>\nAziz & \n\n\n\n\n4>-- Artists --</color>\n\xF6rnek & \n\n\n\n\n\n<size=48><color=#F4F1DE>THANK
-    YOU FOR PLAYING!</color></size>"
+  m_text: "I LOVE NATURE\n\n\n\nGame Developers\nAziz & Mert\n\n\n\n\nArtists \nSude
+    & Dilay \n\n\n\n\n\nTHANK YOU FOR PLAYING!"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: e844efebb78e1ef4cb4e8a99f08bca80, type: 2}
   m_sharedMaterial: {fileID: -8876996706068569518, guid: e844efebb78e1ef4cb4e8a99f08bca80, type: 2}

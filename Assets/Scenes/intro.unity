@@ -236,8 +236,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: e844efebb78e1ef4cb4e8a99f08bca80, type: 2}
+  m_sharedMaterial: {fileID: -8876996706068569518, guid: e844efebb78e1ef4cb4e8a99f08bca80, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -256,7 +256,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -573,17 +573,11 @@ MonoBehaviour:
   _cardCanvasGroup: {fileID: 70262396}
   _nextIndicator: {fileID: 1329568486}
   _cards:
-  - Image: {fileID: 2680967238807739287, guid: cb40922938465a349ba94901f422f1ce, type: 3}
-    NarrationText: "Sonsuz ye\u015Filliklerin i\xE7inde, do\u011Fan\u0131n kalbinde
-      gizemli bir robot olarak uyand\u0131m..."
-  - Image: {fileID: -8338419070329957434, guid: a06053290b366844db55d21bf63a1a8a, type: 3}
-    NarrationText: "Fakat ormanda ters giden bir \u015Feyler vard\u0131. Canl\u0131lar
-      sald\u0131rganla\u015Fm\u0131\u015F, as\u0131rl\u0131k a\u011Fa\xE7lar birer
-      birer yok oluyordu..."
-  - Image: {fileID: -8907945267164518999, guid: beaa7774f874b4046829b1719b9dd5e8, type: 3}
-    NarrationText: "Do\u011Fan\u0131n bu \xE7\u0131\u011Fl\u0131\u011F\u0131n\u0131
-      dindirmek ve orman\u0131 eski huzuruna kavu\u015Fturmak art\u0131k benim g\xF6revimdi.
-      Yolculuk ba\u015Flas\u0131n!"
+  - Image: {fileID: 21300000, guid: 8eedbea3019a4864f8bc6246d4d3a298, type: 3}
+    NarrationText: 'DevourCorp: A mega-corporation unleashing legions of resource-harvesting
+      robots upon the world. '
+  - Image: {fileID: 21300000, guid: 54d3792efe6e28044864c78810facf80, type: 3}
+    NarrationText: The harvest has begun... and nature is paying the ultimate price.
   _typewriterSpeed: 0.035
   _cardFadeDuration: 0.4
   _nextSceneName: Level_01
@@ -649,7 +643,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 3434269913
   m_fontColor: {r: 0.85, g: 0.8, b: 0.7, a: 0.8}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -662,7 +656,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -838,7 +832,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0

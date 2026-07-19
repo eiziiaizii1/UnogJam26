@@ -252,9 +252,33 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 7390818862999198828}
     m_Modifications:
+    - target: {fileID: 774517695091341993, guid: d4f2d3e94be42c04b853ac660dd5a718, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
+      objectReference: {fileID: 0}
     - target: {fileID: 3464208825197722090, guid: d4f2d3e94be42c04b853ac660dd5a718, type: 3}
       propertyPath: m_Name
       value: DialogueBubble
+      objectReference: {fileID: 0}
+    - target: {fileID: 4409689597795579568, guid: d4f2d3e94be42c04b853ac660dd5a718, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: e844efebb78e1ef4cb4e8a99f08bca80, type: 2}
+    - target: {fileID: 4409689597795579568, guid: d4f2d3e94be42c04b853ac660dd5a718, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: -8876996706068569518, guid: e844efebb78e1ef4cb4e8a99f08bca80, type: 2}
+    - target: {fileID: 4409689597795579568, guid: d4f2d3e94be42c04b853ac660dd5a718, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4293326320
+      objectReference: {fileID: 0}
+    - target: {fileID: 4409689597795579568, guid: d4f2d3e94be42c04b853ac660dd5a718, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 4409689597795579568, guid: d4f2d3e94be42c04b853ac660dd5a718, type: 3}
+      propertyPath: m_hasFontAssetChanged
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5450912501082017791, guid: d4f2d3e94be42c04b853ac660dd5a718, type: 3}
       propertyPath: m_Pivot.x

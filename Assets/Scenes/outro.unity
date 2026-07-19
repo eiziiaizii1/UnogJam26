@@ -166,7 +166,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 3434269913
   m_fontColor: {r: 0.85, g: 0.8, b: 0.7, a: 0.8}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -179,7 +179,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -406,8 +406,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: e844efebb78e1ef4cb4e8a99f08bca80, type: 2}
+  m_sharedMaterial: {fileID: -8876996706068569518, guid: e844efebb78e1ef4cb4e8a99f08bca80, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -426,7 +426,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -575,7 +575,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -614,11 +614,9 @@ MonoBehaviour:
   _cardCanvasGroup: {fileID: 1616336780}
   _nextIndicator: {fileID: 64182227}
   _cards:
-  - Image: {fileID: -6767989623075728285, guid: 5aa91b79247827c448e8b5d53a2e904f, type: 3}
-    NarrationText: "G\xF6rkemli patlaman\u0131n ard\u0131ndan ormandaki as\u0131rl\u0131k
-      sessizlik geri d\xF6nd\xFC...\n\nKahraman robotumuzun asil fedakarl\u0131\u011F\u0131
-      sayesinde do\u011Fan\u0131n dengesi yeniden sa\u011Fland\u0131. Orman, onu
-      koruyan bu demir kalbi asla unutmayacak..."
+  - Image: {fileID: -2466775416267902919, guid: 675e8e9208896c04cb2c1c462fdb20f4, type: 3}
+    NarrationText: Nature paid the ultimate price. Consumed, depleted, and destroyed
+      by DevourCorp's insatiable greed. Earth is no more.
   _typewriterSpeed: 0.035
   _cardFadeDuration: 0.4
   _nextSceneName: credits
