@@ -1,14 +1,10 @@
 fileFormatVersion: 2
-guid: fb4a12af3b204a5459da286a3a46b09f
-AssetOrigin:
-  serializedVersion: 1
-  productId: 275304
-  packageName: Pixel art Menu package (5 sets)
-  packageVersion: 1.0
-  assetPath: Assets/Pixel art Menu package (5 sets)/fancy metal/border.png
-  uploadId: 639604
+guid: 77b1ac72d90ef2148a5a6d310da0ff8c
 TextureImporter:
-  internalIDToNameTable: []
+  internalIDToNameTable:
+  - first:
+      213: -2132956935838155565
+    second: border_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -79,19 +75,6 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: WebGL
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
     textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
@@ -114,7 +97,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: Server
+    buildTarget: WebGL
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -133,8 +116,8 @@ TextureImporter:
       name: border_0
       rect:
         serializedVersion: 2
-        x: 92
-        y: 46
+        x: 0
+        y: 0
         width: 47
         height: 14
       alignment: 0
@@ -143,10 +126,10 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 5626043a88741184197b4697b67f4245
-      internalID: 398557791
+      spriteID: 3dc392eb7f63662e0800000000000000
+      internalID: -2132956935838155565
       vertices: []
       indices: 
       edges: []
@@ -165,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      border_0: 398557791
+      border_0: -2132956935838155565
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
