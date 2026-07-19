@@ -27,8 +27,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 3, y: 3, z: 3}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 3579753649513469129}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -252,9 +252,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3579753649513469129}
     m_Modifications:
+    - target: {fileID: 774517695091341993, guid: d4f2d3e94be42c04b853ac660dd5a718, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
+      objectReference: {fileID: 0}
     - target: {fileID: 3464208825197722090, guid: d4f2d3e94be42c04b853ac660dd5a718, type: 3}
       propertyPath: m_Name
       value: DialogueBubble
+      objectReference: {fileID: 0}
+    - target: {fileID: 4409689597795579568, guid: d4f2d3e94be42c04b853ac660dd5a718, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4293326320
+      objectReference: {fileID: 0}
+    - target: {fileID: 4409689597795579568, guid: d4f2d3e94be42c04b853ac660dd5a718, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
       objectReference: {fileID: 0}
     - target: {fileID: 5450912501082017791, guid: d4f2d3e94be42c04b853ac660dd5a718, type: 3}
       propertyPath: m_Pivot.x
