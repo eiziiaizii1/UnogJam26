@@ -15,9 +15,13 @@ MonoBehaviour:
   _levels:
   - SceneName: Level_01
     UpgradeOnEnter: {fileID: 0}
+    AppearanceOnEnter: {fileID: 11400000, guid: 8fbe626d859f20049839dad364ad023d, type: 2}
   - SceneName: Level_02
     UpgradeOnEnter: {fileID: 11400000, guid: 28673dd64d1362c49941735ec8c04f8f, type: 2}
+    AppearanceOnEnter: {fileID: 11400000, guid: 17c6e9cc779eb0648abb5530b615f52a, type: 2}
   - SceneName: Level_03
     UpgradeOnEnter: {fileID: 11400000, guid: cdced60cc5283ee458d388428105021c, type: 2}
+    AppearanceOnEnter: {fileID: 0}
   - SceneName: Level_04
     UpgradeOnEnter: {fileID: 11400000, guid: 762c50159c3fac245b28aa59ac901e28, type: 2}
+    AppearanceOnEnter: {fileID: 0}

@@ -103,7 +103,7 @@ namespace Game.Runtime.Level
         /// </summary>
         private void ApplyEarnedUpgrades()
         {
-            if (_levels == null || State.LevelIndex <= 0) return;
+            if (_levels == null) return;
 
             var player = FindPlayer();
             if (player == null)
@@ -111,6 +111,12 @@ namespace Game.Runtime.Level
                 Debug.LogWarning($"[{nameof(RunController)}] No player found in the loaded scene — upgrades skipped.", this);
                 return;
             }
+
+            // Appearance is not cumulative and applies on level 0 too, so it runs before the
+            // upgrade loop's early-out.
+            ApplyAppearance(player);
+
+            if (State.LevelIndex <= 0) return;
 
             for (int i = 1; i <= State.LevelIndex; i++)
             {
@@ -126,6 +132,21 @@ namespace Game.Runtime.Level
                 var indicator = player.GetComponentInChildren<LevelUpIndicator>(true);
                 if (indicator != null) indicator.Play(_pendingLevelUpMessage);
             }
+        }
+
+        /// <summary>
+        /// Swaps the robot's look to whatever this level authored. Silent when the sequence defines
+        /// no appearance at all, so the prefab's own sprites remain the default.
+        /// </summary>
+        private void ApplyAppearance(GameObject player)
+        {
+            var appearance = _levels.GetAppearanceFor(State.LevelIndex);
+            if (appearance == null) return;
+
+            var animator = player.GetComponentInChildren<Game.Runtime.Player.PlayerSpriteAnimator>(true);
+            if (animator == null) return;
+
+            animator.ApplyAppearance(appearance);
         }
 
         /// <summary>

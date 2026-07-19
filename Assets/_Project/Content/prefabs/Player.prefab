@@ -799,6 +799,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _input: {fileID: 3541757831914459896}
   _renderer: {fileID: 7813597906478425990}
+  _appearance: {fileID: 11400000, guid: 8fbe626d859f20049839dad364ad023d, type: 2}
   _idleRight:
   - {fileID: -2050048922, guid: 49d03b4b9407ccc4b987c23681cfa3d3, type: 3}
   - {fileID: -950741233, guid: 49d03b4b9407ccc4b987c23681cfa3d3, type: 3}
