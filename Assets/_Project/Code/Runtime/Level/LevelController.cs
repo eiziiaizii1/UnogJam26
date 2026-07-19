@@ -3,6 +3,7 @@ using Game.Runtime.Combat;
 using Game.Runtime.Events;
 using Game.Runtime.Player;
 using UnityEngine;
+using UnityEngine.UI;
 using PrimeTween;
 
 namespace Game.Runtime.Level
@@ -169,6 +170,9 @@ namespace Game.Runtime.Level
 
         private IEnumerator FinalExplosionRoutine()
         {
+            // Create the full-screen overlay image
+            var flashImage = CreateFlashOverlay();
+
             // 1. Freeze player controls and physics
             if (_body != null)
             {
@@ -187,16 +191,21 @@ namespace Game.Runtime.Level
             var chargePsLeft = CreateChargeParticles(-0.4f);
             var chargePsRight = CreateChargeParticles(0.4f);
 
-            // Camera shakes with increasing intensity during charge up (1.5s)
+            // Camera shakes with increasing intensity and screen slowly glows red during charge up (1.5s)
             float elapsed = 0f;
             float duration = 1.5f;
             var cameraFollow = Camera.main != null ? Camera.main.GetComponent<Game.Runtime.Presentation.CameraFollow>() : null;
             while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
+                float progress = elapsed / duration;
                 if (cameraFollow != null)
                 {
-                    cameraFollow.Shake(0.12f + (elapsed / duration) * 0.35f, 5f);
+                    cameraFollow.Shake(0.12f + progress * 0.45f, 5f);
+                }
+                if (flashImage != null)
+                {
+                    flashImage.color = new Color(1f, 0.25f, 0.08f, progress * 0.45f);
                 }
                 yield return null;
             }
@@ -213,22 +222,31 @@ namespace Game.Runtime.Level
             if (visuals != null) visuals.gameObject.SetActive(false);
             else if (_renderer != null) _renderer.enabled = false;
 
-            // Heavy screen shake on explosion
+            // Maximum Camera Shake on explosion!
             if (cameraFollow != null)
             {
-                cameraFollow.Shake(1.3f, 2f);
+                cameraFollow.Shake(2.2f, 1.5f);
             }
 
-            // Wait for explosion to finish
-            yield return new WaitForSeconds(1.2f);
+            // Instantly flash to solid white, then cinematic color fade to black
+            if (flashImage != null)
+            {
+                flashImage.color = Color.white;
+                
+                Sequence.Create()
+                    .Chain(Tween.Color(flashImage, new Color(1f, 0.85f, 0.15f, 1f), 0.35f, Ease.OutQuad)) // Blazing Yellow/Orange
+                    .Chain(Tween.Color(flashImage, new Color(0.9f, 0.12f, 0.05f, 1f), 0.45f, Ease.InOutQuad)) // Deep Fire Red
+                    .Chain(Tween.Color(flashImage, Color.black, 0.8f, Ease.InQuad)); // Solid Black
+            }
+
+            // Wait for cinematic explosion sequence to complete (1.8s)
+            yield return new WaitForSeconds(1.8f);
 
             if (explosionPs != null) Destroy(explosionPs.gameObject);
 
-            // 4. Load Credits scene
-            if (_levelCompleted != null)
-            {
-                _levelCompleted.Raise();
-            }
+            // 4. Load Credits scene directly while screen is solid black!
+            // Since we are already black, loading directly makes it a 100% seamless cinematic transition!
+            UnityEngine.SceneManagement.SceneManager.LoadScene("credits");
         }
 
         private ParticleSystem CreateChargeParticles(float xOffset)
@@ -371,6 +389,33 @@ namespace Game.Runtime.Level
 
             // Re-trigger entrance animation
             PlayEntranceAnimation();
+        }
+
+        private Image CreateFlashOverlay()
+        {
+            GameObject canvasGo = new GameObject("ExplosionFlashCanvas", typeof(Canvas), typeof(CanvasScaler));
+            canvasGo.transform.position = Vector3.zero;
+            
+            var canvas = canvasGo.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 999; // Render on top of everything
+            
+            var scaler = canvasGo.GetComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920, 1080);
+            
+            GameObject imageGo = new GameObject("FlashImage", typeof(RectTransform), typeof(Image));
+            imageGo.transform.SetParent(canvasGo.transform, false);
+            
+            var rt = imageGo.GetComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.sizeDelta = Vector2.zero;
+            
+            var img = imageGo.GetComponent<Image>();
+            img.color = new Color(1f, 1f, 1f, 0f); // Start fully transparent
+            
+            return img;
         }
     }
 }
