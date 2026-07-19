@@ -108,7 +108,12 @@ namespace Game.Runtime.Level
             var player = FindPlayer();
             if (player == null)
             {
-                Debug.LogWarning($"[{nameof(RunController)}] No player found in the loaded scene — upgrades skipped.", this);
+                // Only a gameplay level is expected to have a player. The outro and menu legitimately
+                // don't, and warning there is noise that trains everyone to ignore the console.
+                if (IsGameplayScene(SceneManager.GetActiveScene().name))
+                {
+                    Debug.LogWarning($"[{nameof(RunController)}] No player found in the loaded scene — upgrades skipped.", this);
+                }
                 return;
             }
 
@@ -147,6 +152,19 @@ namespace Game.Runtime.Level
             if (animator == null) return;
 
             animator.ApplyAppearance(appearance);
+        }
+
+        /// <summary>True when the named scene is one of the run's levels (not the menu or outro).</summary>
+        private bool IsGameplayScene(string sceneName)
+        {
+            if (_levels == null || string.IsNullOrEmpty(sceneName)) return false;
+
+            for (int i = 0; i < _levels.Count; i++)
+            {
+                if (_levels.GetSceneName(i) == sceneName) return true;
+            }
+
+            return false;
         }
 
         /// <summary>

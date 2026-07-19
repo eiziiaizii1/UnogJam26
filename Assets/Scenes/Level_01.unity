@@ -938,6 +938,7 @@ MonoBehaviour:
   _completeTint: {r: 0.4, g: 0.9, b: 0.5, a: 1}
   _levelCompleted: {fileID: 11400000, guid: 78f3ed4832a2d5842b05b91577eaa22f, type: 2}
   _playerDiedChannel: {fileID: 11400000, guid: d4a422a991a6a494abbf82200f09c3b0, type: 2}
+  _explosionSfx: {fileID: 0}
 --- !u!1001 &686321580
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1470,6 +1471,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1145107955}
     m_Modifications:
+    - target: {fileID: 2907719612441935644, guid: 3229ea1173c1c7242a2505435333af2d, type: 3}
+      propertyPath: m_Size.x
+      value: 1.8762989
+      objectReference: {fileID: 0}
+    - target: {fileID: 2907719612441935644, guid: 3229ea1173c1c7242a2505435333af2d, type: 3}
+      propertyPath: m_Size.y
+      value: 1.0167732
+      objectReference: {fileID: 0}
+    - target: {fileID: 2907719612441935644, guid: 3229ea1173c1c7242a2505435333af2d, type: 3}
+      propertyPath: m_Offset.x
+      value: 0.0044317245
+      objectReference: {fileID: 0}
+    - target: {fileID: 2907719612441935644, guid: 3229ea1173c1c7242a2505435333af2d, type: 3}
+      propertyPath: m_Offset.y
+      value: -0.013293505
+      objectReference: {fileID: 0}
     - target: {fileID: 5660192333999791335, guid: 3229ea1173c1c7242a2505435333af2d, type: 3}
       propertyPath: m_LocalScale.x
       value: 2
@@ -1581,6 +1598,7 @@ MonoBehaviour:
   _completeTint: {r: 0.4, g: 0.9, b: 0.5, a: 1}
   _levelCompleted: {fileID: 11400000, guid: 78f3ed4832a2d5842b05b91577eaa22f, type: 2}
   _playerDiedChannel: {fileID: 11400000, guid: d4a422a991a6a494abbf82200f09c3b0, type: 2}
+  _explosionSfx: {fileID: 0}
 --- !u!4 &1231758333
 Transform:
   m_ObjectHideFlags: 0

@@ -103,5 +103,33 @@ namespace Game.Runtime.Audio
         {
             Play(_pickupSfx);
         }
+
+        /// <summary>
+        /// Plays a cue on a throwaway <see cref="DontDestroyOnLoad"/> source so it survives a scene
+        /// load. The pooled sources above live and die with their scene, which truncates any cue
+        /// that outlasts a transition — the final explosion rings for 5s but the outro loads after
+        /// 1.8s. Use sparingly; this is for one-shot cinematic beats, not gameplay SFX.
+        /// </summary>
+        public static void PlayDetached(SfxDefinition cue)
+        {
+            if (cue == null) return;
+
+            var clip = cue.GetRandomClip();
+            if (clip == null) return;
+
+            var host = new GameObject("DetachedSfx_" + clip.name);
+            DontDestroyOnLoad(host);
+
+            var source = host.AddComponent<AudioSource>();
+            source.clip = clip;
+            source.volume = cue.Volume;
+            source.pitch = Random.Range(cue.PitchMin, cue.PitchMax);
+            source.spatialBlend = 0f;
+            source.outputAudioMixerGroup = cue.OutputGroup;
+            source.Play();
+
+            // Pitch stretches playback time, so scale the lifetime by it or a slowed cue gets cut.
+            Destroy(host, clip.length / Mathf.Max(0.01f, source.pitch) + 0.25f);
+        }
     }
 }

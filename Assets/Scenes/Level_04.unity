@@ -648,6 +648,7 @@ MonoBehaviour:
   _completeTint: {r: 0.4, g: 0.9, b: 0.5, a: 1}
   _levelCompleted: {fileID: 11400000, guid: 78f3ed4832a2d5842b05b91577eaa22f, type: 2}
   _playerDiedChannel: {fileID: 11400000, guid: d4a422a991a6a494abbf82200f09c3b0, type: 2}
+  _explosionSfx: {fileID: 11400000, guid: af7b4f4ae009d764da49b12d0a33db64, type: 2}
 --- !u!114 &815766294 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3444076839348938416, guid: 3aa0402302389d249910ea57b72e8e0b, type: 3}
@@ -1062,6 +1063,7 @@ MonoBehaviour:
   _completeTint: {r: 0.4, g: 0.9, b: 0.5, a: 1}
   _levelCompleted: {fileID: 11400000, guid: 78f3ed4832a2d5842b05b91577eaa22f, type: 2}
   _playerDiedChannel: {fileID: 11400000, guid: d4a422a991a6a494abbf82200f09c3b0, type: 2}
+  _explosionSfx: {fileID: 0}
 --- !u!4 &1231758333
 Transform:
   m_ObjectHideFlags: 0

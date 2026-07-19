@@ -26,6 +26,10 @@ namespace Game.Runtime.Level
         [SerializeField] private VoidEventChannel _levelCompleted;
         [SerializeField] private VoidEventChannel _playerDiedChannel;
 
+        [Header("Audio")]
+        [Tooltip("Final-level explosion. Only used by Level_04; leave empty elsewhere.")]
+        [SerializeField] private Game.Runtime.Audio.SfxDefinition _explosionSfx;
+
         private HealthComponent _health;
         private PlayerDeath _death;
         private Rigidbody2D _body;
@@ -217,6 +221,10 @@ namespace Game.Runtime.Level
             // 3. EXPLODE!
             var explosionPs = CreateExplosionParticles();
 
+            // Detached so the 5s blast keeps ringing after the outro scene loads 1.8s from now —
+            // a pooled scene-local source would be destroyed mid-boom.
+            Game.Runtime.Audio.SfxPlayer.PlayDetached(_explosionSfx);
+
             // Hide Player Visuals / Sprite Renderer
             var visuals = _player.transform.Find("Visuals");
             if (visuals != null) visuals.gameObject.SetActive(false);
@@ -256,8 +264,12 @@ namespace Game.Runtime.Level
             go.transform.localPosition = new Vector3(xOffset, -0.2f, 0f);
 
             var ps = go.AddComponent<ParticleSystem>();
+            // AddComponent starts the system immediately (playOnAwake), and 'duration' is read-only
+            // while playing — configuring it without stopping first logs an error per system.
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
             var main = ps.main;
+            main.playOnAwake = false;
             main.duration = 2f;
             main.loop = true;
             main.startLifetime = 0.45f;
@@ -306,8 +318,10 @@ namespace Game.Runtime.Level
             go.transform.position = _player.transform.position;
 
             var ps = go.AddComponent<ParticleSystem>();
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
             var main = ps.main;
+            main.playOnAwake = false;
             main.duration = 1.2f;
             main.loop = false;
             main.startLifetime = 0.9f;
