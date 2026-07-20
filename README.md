@@ -4,6 +4,8 @@
 
 Made in 48 hours for UNOG Jam 2026 · Unity 6 (URP 2D)
 
+[itch.io](https://eiziiaizii11.itch.io/i-love-nature)
+
 ---
 
 ## The premise
